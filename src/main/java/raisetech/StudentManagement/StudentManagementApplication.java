@@ -13,9 +13,9 @@ public class StudentManagementApplication {
 		SpringApplication.run(StudentManagementApplication.class, args);
 	}
 
-  @GetMapping("/juyeon")
-  public String juyeon(){
-    return "かっこいい!";
+  @GetMapping("/hello")
+  public String hello(){
+    return "hello!";
   }
 
 }
