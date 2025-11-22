@@ -26,9 +26,14 @@ repositories {
 }
 
 dependencies {
+    //Spring Boot
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-    //Apache Commons lang
+
+    //Apache Commons lang 便利機能、ユーティリティ
     implementation 'org.apache.commons:commons-lang3:3.19.0'
+
+    //Thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     //Lombok
     compileOnly 'org.projectlombok:lombok'
