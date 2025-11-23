@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 @Service
@@ -23,8 +24,11 @@ public class StudentService {
     return repository.search();
   }
 
-
   public List<StudentCourse> getStudentCourseList(){
     return repository.searchByCourse();
   }
+
+  public void registerStudent(StudentDetail studentDetail){
+    repository.insertStudent(studentDetail.getStudent());
+}
 }

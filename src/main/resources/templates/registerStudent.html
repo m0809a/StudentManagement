@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>受講生登録</title>
+  <style>
+    .section-box {
+      border: 1px solid #ccc;
+      padding: 5px 16px;
+      border-radius: 8px;
+      margin-bottom: 24px auto;
+      width: 350px;
+    }
+
+    label {
+      display: block;
+      margin-top: 5px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+<h1>受講生登録</h1>
+<form th:action="@{/registerStudent}" th:object="${studentDetail}" method="post">
+  <div class="section-box">
+    <label for="id">ID:</label>
+    <input type="text" id="id" th:field="*{student.id}" required />
+
+
+    <label for="name">名前:</label>
+    <input type="text" id="name" th:field="*{student.name}" required />
+
+
+    <label for="kanaName">フリガナ:</label>
+    <input type="text" id="kanaName" th:field="*{student.kanaName}" required />
+
+
+    <label for="nickname">ニックネーム:</label>
+    <input type="text" id="nickname" th:field="*{student.nickname}" required />
+
+
+    <label for="email">メールアドレス:</label>
+    <input type="text" id="email" th:field="*{student.email}" required />
+
+
+    <label for="address">住所:</label>
+    <input type="text" id="address" th:field="*{student.address}" required />
+
+
+    <label for="age">年齢:</label>
+    <input type="text" id="age" th:field="*{student.age}" required />
+
+
+    <label for="gender">性別:</label>
+    <select id="gender" th:field="*{student.gender}" required>
+      <option value="">選択してください</option>
+      <option value="男">男性</option>
+      <option value="女">女性</option>
+      <option value="その他">その他</option>
+    </select>
+
+
+    <label for="remark">備考:</label>
+    <textarea id="remark" th:field="*{student.remark}" rows="5" cols="40"></textarea>
+
+  </div>
+
+  <div>
+    <button type="submit">登録</button>
+  </div>
+</form>
+</body>
+</html>
