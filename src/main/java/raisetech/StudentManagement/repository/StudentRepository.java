@@ -25,7 +25,7 @@ public interface StudentRepository {
   void insertStudent(Student student);
 
   @Insert("""
-      INSERT INTO students_courses(id, studentId, courseName, courseStartAt, courseEndAt)
+      INSERT INTO students_courses(id, student_id, course_name, course_start_at, course_end_at)
       VALUES (#{id}, #{studentId}, #{courseName}, #{courseStartAt}, #{courseEndAt})
       """)
   void insertStudentCourses(StudentCourse studentCourse);

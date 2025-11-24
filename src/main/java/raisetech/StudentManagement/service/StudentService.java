@@ -30,5 +30,13 @@ public class StudentService {
 
   public void registerStudent(StudentDetail studentDetail){
     repository.insertStudent(studentDetail.getStudent());
+
+    for (StudentCourse course : studentDetail.getStudentCourses()){
+      if (course.getCourseName() == null || course.getCourseName().isBlank()){
+        continue;
+      }
+      course.setStudentId(studentDetail.getStudent().getId());
+      repository.insertStudentCourses(course);
+    }
 }
 }
