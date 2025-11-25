@@ -63,8 +63,18 @@
 
     <div style="margin-bottom: 20px;">
       <label for="courseName">受講コース名:</label>
-      <input type="text" id="courseName" th:field="*{studentCourses[0].courseName}" required/>
+
+      <select id="courseName"
+              th:field="*{studentCourses[0].courseName}"　required>
+        <option value="">選択してください</option>
+        <option value="Java入門コース">Java入門コース</option>
+        <option value="Webアプリ開発コース">Webアプリ開発コース</option>
+        <option value="AWS基礎コース">AWS基礎コース</option>
+        <option value="DB設計コース">DB設計コース</option>
+        <option value="python基礎コース">python基礎コース</option>
+      </select>
     </div>
+
 
   </div>
 
