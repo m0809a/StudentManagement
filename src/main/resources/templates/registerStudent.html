@@ -24,9 +24,6 @@
 <h1>受講生登録</h1>
 <form th:action="@{/registerStudent}" th:object="${studentDetail}" method="post">
   <div class="section-box">
-    <label for="id">ID:</label>
-    <input type="text" id="id" th:field="*{student.id}" required />
-
 
     <label for="name">名前:</label>
     <input type="text" id="name" th:field="*{student.name}" required />

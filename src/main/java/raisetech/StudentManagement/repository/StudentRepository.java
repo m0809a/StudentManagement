@@ -12,6 +12,10 @@ import raisetech.StudentManagement.data.StudentCourse;
 @Mapper
 public interface StudentRepository {
 
+
+  @Select("SELECT id FROM students ORDER BY id DESC LIMIT 1")
+  String findMaxStudentId();
+
   @Select("SELECT * FROM students")
   List<Student> search();
 

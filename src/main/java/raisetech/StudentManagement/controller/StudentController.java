@@ -62,6 +62,9 @@ public class StudentController {
   public String registerStudent(@ModelAttribute("studentDetail") StudentDetail studentDetail,
       BindingResult result) {
 
+    String newId = service.createStudentId();
+    studentDetail.getStudent().setId(newId);
+
     if (result.hasErrors()) {
       return "registerStudent";
     }
