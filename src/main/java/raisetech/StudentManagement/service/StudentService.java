@@ -1,5 +1,6 @@
 package raisetech.StudentManagement.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,24 @@ public class StudentService {
     return String.format("S%06d", num);
   }
 
+  //コース名に対応するIDを挿入
+  public String getCourseIdByName(String courseName) {
+    switch (courseName) {
+      case "Java入門コース":
+        return "C000001";
+      case "Webアプリ開発コース":
+        return "C000002";
+      case "AWS基礎コース":
+        return "C000003";
+      case "DB設計コース":
+        return "C000004";
+      case "python基礎コース":
+        return "C000005";
+      default:
+        return "C-OTHER"; // その他コース
+    }
+  }
+
 
   public List<Student> searchStudentList() {
     return repository.search();
@@ -48,7 +67,11 @@ public class StudentService {
       if (course.getCourseName() == null || course.getCourseName().isBlank()){
         continue;
       }
+      String fixedCourseId = getCourseIdByName(course.getCourseName());
+      course.setId(fixedCourseId);
       course.setStudentId(studentDetail.getStudent().getId());
+      course.setCourseStartAt(LocalDate.now());
+      course.setCourseEndAt(LocalDate.now().plusYears(1));
       repository.insertStudentCourses(course);
     }
 }
