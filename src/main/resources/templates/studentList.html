@@ -17,7 +17,9 @@
     <th>地域</th>
     <th>年齢</th>
     <th>性別</th>
+    <th>受講コース</th>
     <th>備考</th>
+
   </tr>
   </thead>
   <tbody>
@@ -30,7 +32,13 @@
     <td th:text="${studentDetail.student.address}">東京</td>
     <td th:text="${studentDetail.student.age}">34</td>
     <td th:text="${studentDetail.student.gender}">男性</td>
+    <td>
+      <span th:each="c : ${studentDetail.studentCourses}">
+        <span th:text="${c.courseName}"></span><br/>
+      </span>
+    </td>
     <td th:text="${studentDetail.student.remark}">特になし</td>
+
   </tr>
   </tbody>
 </table>
