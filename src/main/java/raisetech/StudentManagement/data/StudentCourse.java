@@ -1,5 +1,6 @@
 package raisetech.StudentManagement.data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +14,7 @@ public class StudentCourse {
   private String id;
   private String studentId;
   private String courseName;
-  private LocalDateTime courseStartAt;
-  private LocalDateTime courseEndAt;
+  private LocalDate courseStartAt;
+  private LocalDate courseEndAt;
 
 }

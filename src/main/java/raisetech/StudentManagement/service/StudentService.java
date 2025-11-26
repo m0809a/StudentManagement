@@ -1,11 +1,14 @@
 package raisetech.StudentManagement.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 @Service
@@ -18,13 +21,58 @@ public class StudentService {
     this.repository = repository;
   }
 
+  //id（Sから始まる６桁）を自動生成
+  public String createStudentId() {
+    String maxId = repository.findMaxStudentId(); // ex: "S000010"
+    if (maxId == null) {
+      return "S000001";
+    }
+    int num = Integer.parseInt(maxId.substring(1));
+    num++;
+    return String.format("S%06d", num);
+  }
+
+  //コース名に対応するIDを挿入
+  public String getCourseIdByName(String courseName) {
+    switch (courseName) {
+      case "Java入門コース":
+        return "C000001";
+      case "Webアプリ開発コース":
+        return "C000002";
+      case "AWS基礎コース":
+        return "C000003";
+      case "DB設計コース":
+        return "C000004";
+      case "python基礎コース":
+        return "C000005";
+      default:
+        return "C-OTHER"; // その他コース
+    }
+  }
+
 
   public List<Student> searchStudentList() {
     return repository.search();
   }
 
-
   public List<StudentCourse> getStudentCourseList(){
     return repository.searchByCourse();
   }
+
+  @Transactional
+  public void registerStudent(StudentDetail studentDetail){
+    repository.insertStudent(studentDetail.getStudent());
+
+    for (StudentCourse course : studentDetail.getStudentCourses()){
+      if (course.getCourseName() == null || course.getCourseName().isBlank()){
+        continue;
+      }
+      String fixedCourseId = getCourseIdByName(course.getCourseName());
+      course.setId(fixedCourseId);
+      course.setStudentId(studentDetail.getStudent().getId());
+      course.setCourseStartAt(LocalDate.now());
+      course.setCourseEndAt(LocalDate.now().plusYears(1));
+      repository.insertStudentCourses(course);
+    }
+}
 }
