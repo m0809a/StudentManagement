@@ -91,20 +91,39 @@ public class StudentService {
     }
 
 // 更新
-  @Transactional
-  public void updateStudent(StudentDetail studentDetail) {
-    repository.updateStudent(studentDetail.getStudent());
+@Transactional
+public void updateStudent(StudentDetail studentDetail) {
 
-    for (StudentCourse course : studentDetail.getStudentCourses()) {
-      if (course.getCourseName() == null || course.getCourseName().isBlank()) {
-        continue;
-      }
-      String newCourseId = getCourseIdByName(course.getCourseName());
-      course.setId(newCourseId);
-      course.setStudentId(studentDetail.getStudent().getId());
+  // 受講生を更新
+  repository.updateStudent(studentDetail.getStudent());
+
+  // その受講生のコースが存在するかチェック
+  boolean hasExistingCourses =
+      !repository.findCoursesByStudentId(studentDetail.getStudent().getId()).isEmpty();
+
+
+  for (StudentCourse course : studentDetail.getStudentCourses()) {
+
+    // コース名からIDに変換
+    String newCourseId = getCourseIdByName(course.getCourseName());
+    course.setId(newCourseId);
+    course.setStudentId(studentDetail.getStudent().getId());
+
+    //更新＝新規受講コース契約と仮定
+    course.setCourseStartAt(LocalDate.now());
+    course.setCourseEndAt(LocalDate.now().plusYears(1));
+
+    if (!hasExistingCourses) {
+      // コースが登録されていない
+      repository.insertStudentCourses(course);
+    } else {
+      // コースがすでに登録されている
       repository.updateStudentCourse(course);
     }
   }
+}
+
+
 
 
 
