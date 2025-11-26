@@ -60,11 +60,11 @@ public class StudentService {
   }
 
   @Transactional
-  public void registerStudent(StudentDetail studentDetail){
+  public void registerStudent(StudentDetail studentDetail) {
     repository.insertStudent(studentDetail.getStudent());
 
-    for (StudentCourse course : studentDetail.getStudentCourses()){
-      if (course.getCourseName() == null || course.getCourseName().isBlank()){
+    for (StudentCourse course : studentDetail.getStudentCourses()) {
+      if (course.getCourseName() == null || course.getCourseName().isBlank()) {
         continue;
       }
       String fixedCourseId = getCourseIdByName(course.getCourseName());
@@ -74,5 +74,39 @@ public class StudentService {
       course.setCourseEndAt(LocalDate.now().plusYears(1));
       repository.insertStudentCourses(course);
     }
-}
+
+  }
+//更新処理
+  // 表示
+    public StudentDetail findStudentDetail(String id){
+      Student student = repository.findStudentById(id);
+      List<StudentCourse> courses = repository.findCoursesByStudentId(student.getId());
+
+      StudentDetail detail = new StudentDetail();
+      detail.setStudent(student);
+      detail.setStudentCourses(courses);
+
+      return detail;
+
+    }
+
+// 更新
+  @Transactional
+  public void updateStudent(StudentDetail studentDetail) {
+    repository.updateStudent(studentDetail.getStudent());
+
+    for (StudentCourse course : studentDetail.getStudentCourses()) {
+      if (course.getCourseName() == null || course.getCourseName().isBlank()) {
+        continue;
+      }
+      String newCourseId = getCourseIdByName(course.getCourseName());
+      course.setId(newCourseId);
+      course.setStudentId(studentDetail.getStudent().getId());
+      repository.updateStudentCourse(course);
+    }
+  }
+
+
+
+
 }
