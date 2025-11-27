@@ -9,10 +9,8 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 
 
-
 @Mapper
 public interface StudentRepository {
-
 
 
   @Select("SELECT * FROM students")
@@ -26,9 +24,9 @@ public interface StudentRepository {
   String findMaxStudentId();
 
   @Insert("""
-    INSERT INTO students(id, name, kana_name, nickname, email, address, age, gender, remark, is_deleted)
-    VALUES (#{id}, #{name}, #{kanaName}, #{nickname}, #{email}, #{address}, #{age}, #{gender}, #{remark}, #{isDeleted})
-    """)
+      INSERT INTO students(id, name, kana_name, nickname, email, address, age, gender, remark, is_deleted)
+      VALUES (#{id}, #{name}, #{kanaName}, #{nickname}, #{email}, #{address}, #{age}, #{gender}, #{remark}, #{isDeleted})
+      """)
   void insertStudent(Student student);
 
   @Insert("""

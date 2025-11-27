@@ -10,7 +10,7 @@ import raisetech.StudentManagement.data.StudentCourse;
 
 @Getter
 @Setter
-public class StudentDetail{
+public class StudentDetail {
 
   private Student student;
   private List<StudentCourse> studentCourses = new ArrayList<>();

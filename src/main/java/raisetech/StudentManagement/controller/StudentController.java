@@ -18,7 +18,6 @@ import raisetech.StudentManagement.service.StudentService;
 import org.springframework.ui.Model;
 
 
-
 @Controller
 public class StudentController {
 
@@ -32,7 +31,7 @@ public class StudentController {
   }
 
   @GetMapping("/studentList")
-  public String  getStudentList(Model model) {
+  public String getStudentList(Model model) {
     List<Student> students = service.searchStudentList();
     List<StudentCourse> studentsCourses = service.getStudentCourseList();
 
@@ -41,13 +40,13 @@ public class StudentController {
   }
 
   @GetMapping("/studentCourseList")
-  public List<StudentCourse> getStudentCourseList(){
+  public List<StudentCourse> getStudentCourseList() {
     return service.getStudentCourseList();
   }
 
   //　登録処理
   @GetMapping("/newStudent")
-  public String newStudent(Model model){
+  public String newStudent(Model model) {
     StudentDetail detail = new StudentDetail();
     detail.setStudent(new Student());
 
@@ -73,18 +72,18 @@ public class StudentController {
     return "redirect:/studentList";
   }
 
-// 更新処理
+  // 更新処理
   @GetMapping("/student/edit/{id}")
-  public String editStudent(@PathVariable("id") String id, Model moodel){
+  public String editStudent(@PathVariable("id") String id, Model moodel) {
     StudentDetail detail = service.findStudentDetail(id);
     moodel.addAttribute("studentDetail", detail);
     return "editStudent";
   }
 
   @PostMapping("/student/update")
-  public String updateStudent(@ModelAttribute("studentDetail") StudentDetail detail){
+  public String updateStudent(@ModelAttribute("studentDetail") StudentDetail detail) {
     service.updateStudent(detail);
-    return  "redirect:/studentList";
+    return "redirect:/studentList";
   }
 
 
