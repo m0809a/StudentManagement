@@ -55,16 +55,16 @@ public class StudentService {
     return repository.search();
   }
 
-  public List<StudentCourse> getStudentCourseList(){
+  public List<StudentCourse> getStudentCourseList() {
     return repository.searchByCourse();
   }
 
   @Transactional
-  public void registerStudent(StudentDetail studentDetail){
+  public void registerStudent(StudentDetail studentDetail) {
     repository.insertStudent(studentDetail.getStudent());
 
-    for (StudentCourse course : studentDetail.getStudentCourses()){
-      if (course.getCourseName() == null || course.getCourseName().isBlank()){
+    for (StudentCourse course : studentDetail.getStudentCourses()) {
+      if (course.getCourseName() == null || course.getCourseName().isBlank()) {
         continue;
       }
       String fixedCourseId = getCourseIdByName(course.getCourseName());
@@ -74,5 +74,54 @@ public class StudentService {
       course.setCourseEndAt(LocalDate.now().plusYears(1));
       repository.insertStudentCourses(course);
     }
-}
+
+  }
+
+  //更新処理
+  // 表示
+  public StudentDetail findStudentDetail(String id) {
+    Student student = repository.findStudentById(id);
+    List<StudentCourse> courses = repository.findCoursesByStudentId(student.getId());
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourses(courses);
+
+    return detail;
+
+  }
+
+  // 更新
+  @Transactional
+  public void updateStudent(StudentDetail studentDetail) {
+
+    // 受講生を更新
+    repository.updateStudent(studentDetail.getStudent());
+
+    // その受講生のコースが存在するかチェック
+    boolean hasExistingCourses =
+        !repository.findCoursesByStudentId(studentDetail.getStudent().getId()).isEmpty();
+
+    for (StudentCourse course : studentDetail.getStudentCourses()) {
+
+      // コース名からIDに変換
+      String newCourseId = getCourseIdByName(course.getCourseName());
+      course.setId(newCourseId);
+      course.setStudentId(studentDetail.getStudent().getId());
+
+      //更新＝新規受講コース契約と仮定
+      course.setCourseStartAt(LocalDate.now());
+      course.setCourseEndAt(LocalDate.now().plusYears(1));
+
+      if (!hasExistingCourses) {
+        // コースが登録されていない
+        repository.insertStudentCourses(course);
+      } else {
+        // コースがすでに登録されている
+        repository.updateStudentCourse(course);
+      }
+    }
+  }
+
+
 }

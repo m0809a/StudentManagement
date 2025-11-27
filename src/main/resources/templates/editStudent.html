@@ -2,7 +2,7 @@
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>受講生登録</title>
+  <title>受講生情報更新</title>
   <style>
     .section-box {
       border: 1px solid #ccc;
@@ -19,10 +19,14 @@
     }
   </style>
 </head>
-
 <body>
-<h1>受講生登録</h1>
-<form th:action="@{/registerStudent}" th:object="${studentDetail}" method="post">
+<h1>受講生更新</h1>
+<form th:action="@{/student/update}" th:object="${studentDetail}" method="post">
+
+  <input type="hidden" th:field="*{student.id}">
+  <input type="hidden" th:field="*{studentCourses[0].id}">
+  <input type="hidden" th:field="*{studentCourses[0].studentId}">
+
   <div class="section-box">
 
     <label for="name">名前:</label>
@@ -80,7 +84,7 @@
 
 
   <div>
-    <button type="submit">登録</button>
+    <button type="submit">更新</button>
   </div>
 </form>
 </body>
