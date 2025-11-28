@@ -16,12 +16,16 @@ public interface StudentRepository {
   @Select("SELECT * FROM students WHERE deleted = false")
   List<Student> search();
 
+  @Select("SELECT * FROM students_courses WHERE deleted = false")
+  List<StudentCourse> searchByCourse();
+
   // キャンセル済みの受講生を表示
   @Select("SELECT * FROM students WHERE deleted = true")
-  List<Student> searchDeleted();
+  List<Student> searchDeletedStudent();
 
-  @Select("SELECT * FROM students_courses")
-  List<StudentCourse> searchByCourse();
+  @Select("SELECT * FROM students_courses WHERE student_id IN (SELECT id FROM students WHERE deleted = 1)")
+  List<StudentCourse> searchCoursesOfDeletedStudents();
+
 
   //studentId自動生成用
   @Select("SELECT id FROM students ORDER BY id DESC LIMIT 1")
@@ -72,6 +76,14 @@ public interface StudentRepository {
       WHERE student_id=#{studentId}
       """)
   void updateStudentCourse(StudentCourse course);
+
+  @Update("""
+    UPDATE students_courses
+    SET deleted = #{deleted}
+    WHERE student_id = #{studentId}
+    """)
+  void updateStudentCourseDeleted(StudentCourse course);
+
 
 
 

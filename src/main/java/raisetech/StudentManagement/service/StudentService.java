@@ -97,6 +97,18 @@ public class StudentService {
     // 受講生を更新
     repository.updateStudent(studentDetail.getStudent());
 
+    //  学生がキャンセルされた場合はコースもキャンセルにする
+    if (studentDetail.getStudent().isDeleted()) {
+      // 今持っているコースを全部取得
+      List<StudentCourse> existingCourses =
+          repository.findCoursesByStudentId(studentDetail.getStudent().getId());
+      // 全コースを論理削除
+      for (StudentCourse course : existingCourses) {
+        course.setDeleted(true);
+        repository.updateStudentCourseDeleted(course);
+      }
+    }
+
     // その受講生のコースが存在するかチェック
     boolean hasExistingCourses =
         !repository.findCoursesByStudentId(studentDetail.getStudent().getId()).isEmpty();
@@ -120,6 +132,15 @@ public class StudentService {
         repository.updateStudentCourse(course);
       }
     }
+  }
+
+
+  public List<Student> searchDeletedStudents() {
+    return repository.searchDeletedStudent();
+  }
+
+  public List<StudentCourse> searchDeletedStudentCourses() {
+    return repository.searchCoursesOfDeletedStudents();
   }
 
 

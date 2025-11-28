@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>キャンセル済み受講生一覧</title>
+</head>
+<body>
+<h1>キャンセル済み受講生一覧</h1>
+
+<table border="1">
+  <tr>
+    <th>ID</th>
+    <th>名前</th>
+    <th>カナ名</th>
+    <th>ニックネーム</th>
+    <th>メールアドレス</th>
+    <th>地域</th>
+    <th>年齢</th>
+    <th>性別</th>
+    <th>受講コース</th>
+    <th>備考</th>
+  </tr>
+
+  <tr th:each="detail : ${deletedStudentList}">
+    <td th:text="${detail.student.id}"></td>
+    <td th:text="${detail.student.name}"></td>
+    <td th:text="${detail.student.kanaName}"></td>
+    <td th:text="${detail.student.nickname}"></td>
+    <td th:text="${detail.student.email}"></td>
+    <td th:text="${detail.student.address}"></td>
+    <td th:text="${detail.student.gender}"></td>
+    <td th:text="${detail.student.age}"></td>
+    <td th:text="${detail.studentCourses[0].courseName}"></td>
+    <td th:text="${detail.student.remark}">特になし</td>
+  </tr>
+</table>
+
+<a href="/studentList">
+  <button type="button">受講生一覧に戻る</button>
+</a>
+
+</body>
+</html>
