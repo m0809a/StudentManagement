@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
@@ -83,11 +82,11 @@ public class StudentService {
     Student student = repository.findStudentById(id);
     List<StudentCourse> courses = repository.findCoursesByStudentId(student.getId());
 
-    StudentDetail detail = new StudentDetail();
-    detail.setStudent(student);
-    detail.setStudentCourses(courses);
+    StudentDetail studentDetail = new StudentDetail();
+    studentDetail.setStudent(student);
+    studentDetail.setStudentCourses(courses);
 
-    return detail;
+    return studentDetail;
 
   }
 
@@ -97,6 +96,18 @@ public class StudentService {
 
     // 受講生を更新
     repository.updateStudent(studentDetail.getStudent());
+
+    //  学生がキャンセルされた場合はコースもキャンセルにする
+    if (studentDetail.getStudent().isDeleted()) {
+      // 今持っているコースを全部取得
+      List<StudentCourse> existingCourses =
+          repository.findCoursesByStudentId(studentDetail.getStudent().getId());
+      // 全コースを論理削除
+      for (StudentCourse course : existingCourses) {
+        course.setDeleted(true);
+        repository.updateStudentCourseDeleted(course);
+      }
+    }
 
     // その受講生のコースが存在するかチェック
     boolean hasExistingCourses =
@@ -121,6 +132,15 @@ public class StudentService {
         repository.updateStudentCourse(course);
       }
     }
+  }
+
+
+  public List<Student> searchDeletedStudents() {
+    return repository.searchDeletedStudent();
+  }
+
+  public List<StudentCourse> searchDeletedStudentCourses() {
+    return repository.searchCoursesOfDeletedStudents();
   }
 
 
