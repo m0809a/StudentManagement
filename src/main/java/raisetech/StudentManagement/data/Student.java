@@ -16,5 +16,5 @@ public class Student {
   private Integer age;
   private String gender;
   private String remark;
-  private boolean isDeleted;   //論理削除　SQL:update  altertableでテーブル更新可能
+  private boolean deleted;   //論理削除　SQL:update  altertableでテーブル更新可能
 }

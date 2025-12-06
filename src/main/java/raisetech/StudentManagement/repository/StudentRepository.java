@@ -12,20 +12,28 @@ import raisetech.StudentManagement.data.StudentCourse;
 @Mapper
 public interface StudentRepository {
 
-
-  @Select("SELECT * FROM students")
+// キャンセル以外の全件取得
+  @Select("SELECT * FROM students WHERE deleted = false")
   List<Student> search();
 
-  @Select("SELECT * FROM students_courses")
+  @Select("SELECT * FROM students_courses WHERE deleted = false")
   List<StudentCourse> searchByCourse();
+
+  // キャンセル済みの受講生を表示
+  @Select("SELECT * FROM students WHERE deleted = true")
+  List<Student> searchDeletedStudent();
+
+  @Select("SELECT * FROM students_courses WHERE student_id IN (SELECT id FROM students WHERE deleted = 1)")
+  List<StudentCourse> searchCoursesOfDeletedStudents();
+
 
   //studentId自動生成用
   @Select("SELECT id FROM students ORDER BY id DESC LIMIT 1")
   String findMaxStudentId();
 
   @Insert("""
-      INSERT INTO students(id, name, kana_name, nickname, email, address, age, gender, remark, is_deleted)
-      VALUES (#{id}, #{name}, #{kanaName}, #{nickname}, #{email}, #{address}, #{age}, #{gender}, #{remark}, #{isDeleted})
+      INSERT INTO students(id, name, kana_name, nickname, email, address, age, gender, remark, deleted)
+      VALUES (#{id}, #{name}, #{kanaName}, #{nickname}, #{email}, #{address}, #{age}, #{gender}, #{remark}, #{deleted})
       """)
   void insertStudent(Student student);
 
@@ -54,7 +62,7 @@ public interface StudentRepository {
           age = #{age},
           gender = #{gender},
           remark = #{remark},
-          is_deleted = #{isDeleted}
+          deleted = #{deleted}
       WHERE id = #{id}
       """)
   void updateStudent(Student student);
@@ -68,6 +76,20 @@ public interface StudentRepository {
       WHERE student_id=#{studentId}
       """)
   void updateStudentCourse(StudentCourse course);
+
+  @Update("""
+    UPDATE students_courses
+    SET deleted = #{deleted}
+    WHERE student_id = #{studentId}
+    """)
+  void updateStudentCourseDeleted(StudentCourse course);
+
+
+
+
+
+
+
 }
 
 

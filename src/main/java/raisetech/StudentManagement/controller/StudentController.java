@@ -87,4 +87,16 @@ public class StudentController {
   }
 
 
+  // キャンセルした受講生情報の一覧を表示
+  @GetMapping("/studentList/deleted")
+  public String getDeletedStudent(Model model){
+    List<Student> students = service.searchDeletedStudents();
+    List<StudentCourse> courses = service.searchDeletedStudentCourses();
+
+    model.addAttribute("deletedStudentList", converter.convertStudentDetails(students, courses));
+
+    return "deletedStudentList";
+  }
+
+
 }
