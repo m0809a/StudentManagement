@@ -12,7 +12,7 @@ import raisetech.StudentManagement.data.StudentCourse;
 @Mapper
 public interface StudentRepository {
 
-// キャンセル以外の全件取得
+  // キャンセル以外の全件取得
   @Select("SELECT * FROM students WHERE deleted = false")
   List<Student> search();
 
@@ -78,16 +78,11 @@ public interface StudentRepository {
   void updateStudentCourse(StudentCourse course);
 
   @Update("""
-    UPDATE students_courses
-    SET deleted = #{deleted}
-    WHERE student_id = #{studentId}
-    """)
+      UPDATE students_courses
+      SET deleted = #{deleted}
+      WHERE student_id = #{studentId}
+      """)
   void updateStudentCourseDeleted(StudentCourse course);
-
-
-
-
-
 
 
 }
