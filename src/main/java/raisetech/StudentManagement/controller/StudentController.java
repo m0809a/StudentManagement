@@ -52,13 +52,13 @@ public class StudentController {
 
 
   @PostMapping("/registerStudent")
-  public ResponseEntity<String> registerStudent(@RequestBody StudentDetail studentDetail){
+  public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail){
 
     String newId = service.createStudentId();
     studentDetail.getStudent().setId(newId);
 
-    service.registerStudent(studentDetail);
-    return ResponseEntity.ok("登録が完了しました！");
+    StudentDetail responseStudentDetail = service.registerStudent(studentDetail);
+    return ResponseEntity.ok(responseStudentDetail);
   }
 
 

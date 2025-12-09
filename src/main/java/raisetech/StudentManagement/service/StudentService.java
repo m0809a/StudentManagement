@@ -47,7 +47,7 @@ import raisetech.StudentManagement.repository.StudentRepository;
 
       /// 登録
       @Transactional
-      public void registerStudent(StudentDetail studentDetail) {
+      public StudentDetail registerStudent(StudentDetail studentDetail) {
         repository.insertStudent(studentDetail.getStudent());
 
         for (StudentCourse course : studentDetail.getStudentCourses()) {
@@ -61,6 +61,8 @@ import raisetech.StudentManagement.repository.StudentRepository;
           course.setCourseEndAt(LocalDate.now().plusYears(1));
           repository.insertStudentCourses(course);
         }
+
+        return studentDetail;
 
       }
 
