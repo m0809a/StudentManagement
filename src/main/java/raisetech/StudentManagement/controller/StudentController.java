@@ -45,7 +45,7 @@ public class StudentController {
     return service.getStudentCourseList();
   }
 
-  //　登録処理
+  //　登録処理  いらない
   @GetMapping("/newStudent")
   public String newStudent(Model model) {
     StudentDetail detail = new StudentDetail();
@@ -60,17 +60,13 @@ public class StudentController {
   }
 
   @PostMapping("/registerStudent")
-  public String registerStudent(@ModelAttribute("studentDetail") StudentDetail studentDetail,
-      BindingResult result) {
+  public ResponseEntity<String> registerStudent(@RequestBody StudentDetail studentDetail){
 
     String newId = service.createStudentId();
     studentDetail.getStudent().setId(newId);
 
-    if (result.hasErrors()) {
-      return "registerStudent";
-    }
     service.registerStudent(studentDetail);
-    return "redirect:/studentList";
+    return ResponseEntity.ok("登録が完了しました！");
   }
 
 
