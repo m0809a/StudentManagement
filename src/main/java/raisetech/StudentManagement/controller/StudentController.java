@@ -45,19 +45,11 @@ public class StudentController {
     return service.getStudentCourseList();
   }
 
-  //　登録処理  いらない
-  @GetMapping("/newStudent")
-  public String newStudent(Model model) {
-    StudentDetail detail = new StudentDetail();
-    detail.setStudent(new Student());
-
-    List<StudentCourse> list = new ArrayList<>();
-    list.add(new StudentCourse());
-    detail.setStudentCourses(list);
-
-    model.addAttribute("studentDetail", detail);
-    return "registerStudent";
+  @GetMapping("/student/{id}")
+  public StudentDetail getStudent(@PathVariable String id){
+    return service.findStudentDetail(id);
   }
+
 
   @PostMapping("/registerStudent")
   public ResponseEntity<String> registerStudent(@RequestBody StudentDetail studentDetail){

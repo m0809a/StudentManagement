@@ -20,36 +20,7 @@ import raisetech.StudentManagement.repository.StudentRepository;
         this.repository = repository;
       }
 
-      //id（Sから始まる６桁）を自動生成
-      public String createStudentId() {
-        String maxId = repository.findMaxStudentId(); // ex: "S000010"
-        if (maxId == null) {
-          return "S000001";
-        }
-        int num = Integer.parseInt(maxId.substring(1));
-        num++;
-        return String.format("S%06d", num);
-      }
-
-      //コース名に対応するIDを挿入
-      public String getCourseIdByName(String courseName) {
-        switch (courseName) {
-          case "Java入門コース":
-            return "C000001";
-          case "Webアプリ開発コース":
-            return "C000002";
-          case "AWS基礎コース":
-            return "C000003";
-          case "DB設計コース":
-            return "C000004";
-          case "python基礎コース":
-            return "C000005";
-          default:
-            return "C-OTHER"; // その他コース
-        }
-      }
-
-
+      //全件取得
       public List<Student> searchStudentList() {
         return repository.search();
       }
@@ -58,6 +29,23 @@ import raisetech.StudentManagement.repository.StudentRepository;
         return repository.searchByCourse();
       }
 
+
+      /// 単一検索
+      public StudentDetail findStudentDetail(String id) {
+        Student student = repository.findStudentById(id);
+        List<StudentCourse> courses = repository.findCoursesByStudentId(student.getId());
+
+        StudentDetail studentDetail = new StudentDetail();
+        studentDetail.setStudent(student);
+        studentDetail.setStudentCourses(courses);
+
+        return studentDetail;
+
+      }
+
+
+
+      /// 登録
       @Transactional
       public void registerStudent(StudentDetail studentDetail) {
         repository.insertStudent(studentDetail.getStudent());
@@ -76,19 +64,37 @@ import raisetech.StudentManagement.repository.StudentRepository;
 
       }
 
-      //更新処理
-      // 表示
-      public StudentDetail findStudentDetail(String id) {
-        Student student = repository.findStudentById(id);
-        List<StudentCourse> courses = repository.findCoursesByStudentId(student.getId());
-
-        StudentDetail studentDetail = new StudentDetail();
-        studentDetail.setStudent(student);
-        studentDetail.setStudentCourses(courses);
-
-        return studentDetail;
-
+      ///登録用
+      //id（Sから始まる６桁）を自動生成
+      public String createStudentId() {
+        String maxId = repository.findMaxStudentId(); // ex: "S000010"
+        if (maxId == null) {
+          return "S000001";
+        }
+        int num = Integer.parseInt(maxId.substring(1));
+        num++;
+        return String.format("S%06d", num);
       }
+      //コース名に対応するIDを挿入
+
+      public String getCourseIdByName(String courseName) {
+        switch (courseName) {
+          case "Java入門コース":
+            return "C000001";
+          case "Webアプリ開発コース":
+            return "C000002";
+          case "AWS基礎コース":
+            return "C000003";
+          case "DB設計コース":
+            return "C000004";
+          case "python基礎コース":
+            return "C000005";
+          default:
+            return "C-OTHER"; // その他コース
+        }
+      }
+
+
 
       // 更新
       @Transactional
@@ -140,6 +146,9 @@ import raisetech.StudentManagement.repository.StudentRepository;
 
         }
       }
+
+
+
 
       public List<Student> searchDeletedStudents() {
         return repository.searchDeletedStudent();
