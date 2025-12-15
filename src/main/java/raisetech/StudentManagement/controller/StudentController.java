@@ -4,8 +4,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.data.StudentCourse;
@@ -68,10 +70,12 @@ public class StudentController {
 
 
   /**
-   * 受講生更新です。
+   * 受講生詳細の更新を行います。キャンセルフラグの更新もここで行います。（理論削除）
    *
+   * @param studentDetail　受講生詳細
+   * @return　実行結果
    */
-  @PostMapping("/student/update")
+  @PutMapping("/student/update")
   public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");

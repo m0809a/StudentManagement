@@ -124,6 +124,13 @@ public interface StudentRepository {
       """)
   void updateStudentCourse(StudentCourse studentCourse);
 
+
+  /**
+   * キャンセルされた受講生の受講生IDに紐付く受講コース情報をキャンセルします。
+   *
+   * @param studentCourse　受講コース情報
+   */
+
   @Update("""
     UPDATE students_courses
     SET deleted = #{deleted}
