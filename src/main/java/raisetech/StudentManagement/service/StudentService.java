@@ -28,10 +28,10 @@ import raisetech.StudentManagement.repository.StudentRepository;
       }
 
   /**
-   * 受講生の一覧検索です。
+   * 受講生詳細の一覧検索です。
    * 全件検索を行うので、条件指定は行いません。
    *
-   * @return　受講生一覧（全件）
+   * @return　受講生詳細一覧（全件）
    */
   public List<StudentDetail> getAllStudent() {
     List<Student> studentList = repository.findAllActiveStudents();
@@ -55,13 +55,13 @@ import raisetech.StudentManagement.repository.StudentRepository;
 
 
   /**
-   * 受講生登録です。
+   * 受講生詳細の登録を行います。
    * 受講生IDが新規作成されます。（その時点でのMAXに+1）
    * 受け取った受講生情報を登録します。
-   * 受講生に紐付いたコース情報を登録します。
+   * 受講生に紐付いたコース情報（値や日付情報）を登録します。
    *
-   * @param studentDetail　受講生詳細情報（受講生情報+コース情報）
-   * @return　登録された受講生詳細
+   * @param studentDetail　受講生詳細
+   * @return　登録した受講生詳細
    */
   @Transactional
       public StudentDetail registerStudentWithNewId(StudentDetail studentDetail) {

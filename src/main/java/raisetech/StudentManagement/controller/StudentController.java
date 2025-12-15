@@ -27,10 +27,10 @@ public class StudentController {
   }
 
   /**
-   * 受講生一覧検索です。
+   * 受講生詳細の一覧検索です。
    * 全件検索を行うので、条件指定は行いません。
    *
-   * @return　受講生一覧（全件）
+   * @return　受講生詳細一覧（全件）
    *
    */
   @GetMapping("/students")
@@ -40,7 +40,7 @@ public class StudentController {
 
 
   /**
-   * 受講生検索です。
+   * 受講生詳細の検索です。
    * IDに紐付く任意の受講生の情報を取得します。
    *
    * @param id　受講生ID
@@ -53,11 +53,10 @@ public class StudentController {
 
 
   /**
-   * 受講生登録です。
+   * 受講生詳細の登録です。
    *
-   * @param studentDetail　受講生情報+受講コース情報
-   *
-   * @return　受講生情報+受講コース情報
+   * @param studentDetail　受講生詳細
+   * @return　実行結果
    */
   @PostMapping("/registerStudent")
   public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail){
