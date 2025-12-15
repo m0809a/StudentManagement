@@ -117,19 +117,21 @@ import raisetech.StudentManagement.repository.StudentRepository;
       }
 
 
-
-      // 更新
-      @Transactional
+  /**
+   * 受講生情報を更新します。
+   * キャンセルせずコース情報を変更する場合は、受講生IDに紐付く受講コース情報を更新します。
+   * キャンセルせず新規にコース情報を登録する場合も、受講生IDに紐付く受講コース情報を更新します。
+   * 受講生がキャンセルされる場合は、受講生IDに紐付く受講コース情報もキャンセルします。
+   *
+   * @param studentDetail　受講生情報+受講生IDに紐付く受講コース情報
+   */
+  @Transactional
       public void updateStudent(StudentDetail studentDetail) {
-
-        // 受講生を更新
         repository.updateStudent(studentDetail.getStudent());
 
-        // 今持っているコースを全部取得
         List<StudentCourse> existingCourses =
             repository.findCoursesByStudentId(studentDetail.getStudent().getId());
 
-        //  学生がキャンセルされた場合はコースもキャンセルにする
         if (studentDetail.getStudent().isDeleted()) {
           for (StudentCourse course : existingCourses) {
             course.setDeleted(true);
@@ -138,38 +140,32 @@ import raisetech.StudentManagement.repository.StudentRepository;
           return;
         }
 
-        // ④ コース更新 or 登録（キャンセルじゃないときだけ実行）
-        if (studentDetail.getStudentCourses() != null
-            && !studentDetail.getStudentCourses().isEmpty()) {
+        if (studentDetail.getStudentCourses() != null) {
+          List<StudentCourse> requestCourses = studentDetail.getStudentCourses();
+            boolean hasExistingCourses = !existingCourses.isEmpty();
+            for (StudentCourse course : studentDetail.getStudentCourses()) {
 
-          // その受講生のコースが存在するかチェック
-          boolean hasExistingCourses = !existingCourses.isEmpty();
+              if (course.getCourseName() == null || course.getCourseName().isBlank()) {
+                continue;
+              }
+              String newCourseId = getCourseIdByName(course.getCourseName());
+              course.setId(newCourseId);
+              course.setStudentId(studentDetail.getStudent().getId());
+              course.setCourseStartAt(LocalDate.now());
+              course.setCourseEndAt(LocalDate.now().plusYears(1));
 
-          for (StudentCourse course : studentDetail.getStudentCourses()) {
-
-            // コース名からIDに変換
-            String newCourseId = getCourseIdByName(course.getCourseName());
-            course.setId(newCourseId);
-            course.setStudentId(studentDetail.getStudent().getId());
-
-            //更新＝新規受講コース契約と仮定
-            course.setCourseStartAt(LocalDate.now());
-            course.setCourseEndAt(LocalDate.now().plusYears(1));
-
-            if (!hasExistingCourses) {
-              // コースが登録されていない
-              repository.insertStudentCourses(course);
-            } else {
-              // コースがすでに登録されている
-              repository.updateStudentCourse(course);
+              if (!hasExistingCourses) {
+                repository.insertStudentCourses(course);
+              } else {
+                repository.updateStudentCourse(course);
+              }
             }
           }
-
 
         }
       }
 
-    }
+
 
 
 

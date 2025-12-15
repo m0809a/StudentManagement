@@ -62,9 +62,9 @@ public interface StudentRepository {
   String findMaxStudentId();
 
   /**
-   * 受講生情報を更新します。
+   * 受講生情報を登録します。
    *
-   * @param student
+   * @param student　受講生情報
    */
   @Insert("""
       INSERT INTO students(id, name, kana_name, nickname, email, address, age, gender, remark, deleted)
@@ -72,12 +72,26 @@ public interface StudentRepository {
       """)
   void insertStudent(Student student);
 
+  /**
+   * 受講生IDに紐付く受講コース情報を登録します。
+   *
+   * @param studentCourse　受講コース情報
+   */
+
   @Insert("""
       INSERT INTO students_courses(id, student_id, course_name, course_start_at, course_end_at)
       VALUES (#{id}, #{studentId}, #{courseName}, #{courseStartAt}, #{courseEndAt})
       """)
   void insertStudentCourses(StudentCourse studentCourse);
 
+
+
+
+  /**
+   * 受講生情報を更新します。
+   *
+   * @param student　受講生情報
+   */
 
   @Update("""
       UPDATE students
@@ -95,6 +109,12 @@ public interface StudentRepository {
   void updateStudent(Student student);
 
 
+  /**
+   * 受講生IDに紐付く受講コース情報を更新します。
+   *
+   * @param studentCourse　受講コース情報
+   */
+
   @Update("""
       UPDATE students_courses
       SET course_name = #{courseName},
@@ -102,14 +122,14 @@ public interface StudentRepository {
           course_end_at = #{courseEndAt}
       WHERE student_id=#{studentId}
       """)
-  void updateStudentCourse(StudentCourse course);
+  void updateStudentCourse(StudentCourse studentCourse);
 
   @Update("""
     UPDATE students_courses
     SET deleted = #{deleted}
     WHERE student_id = #{studentId}
     """)
-  void updateStudentCourseDeleted(StudentCourse course);
+  void updateStudentCourseDeleted(StudentCourse studentCourse);
 
 
 

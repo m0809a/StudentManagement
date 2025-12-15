@@ -52,6 +52,13 @@ public class StudentController {
   }
 
 
+  /**
+   * 受講生登録です。
+   *
+   * @param studentDetail　受講生情報+受講コース情報
+   *
+   * @return　受講生情報+受講コース情報
+   */
   @PostMapping("/registerStudent")
   public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail){
 
@@ -61,6 +68,10 @@ public class StudentController {
   }
 
 
+  /**
+   * 受講生更新です。
+   *
+   */
   @PostMapping("/student/update")
   public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
