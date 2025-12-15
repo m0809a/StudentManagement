@@ -1,6 +1,5 @@
 package raisetech.StudentManagement.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +16,7 @@ import raisetech.StudentManagement.data.StudentCourse;
 public class StudentDetail {
 
   private Student student;
-  private List<StudentCourse> studentCourses;
+  private List<StudentCourse> studentsCourseList;
 
 
 }

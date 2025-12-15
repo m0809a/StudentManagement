@@ -69,14 +69,14 @@ import raisetech.StudentManagement.repository.StudentRepository;
         String newId = createStudentId();
         studentDetail.getStudent().setId(newId);
         repository.insertStudent(studentDetail.getStudent());
-        for (StudentCourse course : studentDetail.getStudentCourses()) {
+        for (StudentCourse course : studentDetail.getStudentsCourseList()) {
           insertCourse(studentDetail, course);
         }
         return studentDetail;
       }
 
   /**
-   * 受講生IDを新規作成します
+   * 受講生IDを自動採番します
    * @return　S+6桁の受講生ID
    */
       private String createStudentId() {
@@ -110,8 +110,9 @@ import raisetech.StudentManagement.repository.StudentRepository;
           String fixedCourseId = getCourseIdByName(course.getCourseName());
           course.setId(fixedCourseId);
           course.setStudentId(studentDetail.getStudent().getId());
-          course.setCourseStartAt(LocalDate.now());
-          course.setCourseEndAt(LocalDate.now().plusYears(1));
+          LocalDate now = LocalDate.now();
+          course.setCourseStartAt(now);
+          course.setCourseEndAt(now.plusYears(1));
           repository.insertStudentCourses(course);
 
       }
@@ -140,10 +141,10 @@ import raisetech.StudentManagement.repository.StudentRepository;
           return;
         }
 
-        if (studentDetail.getStudentCourses() != null) {
-          List<StudentCourse> requestCourses = studentDetail.getStudentCourses();
+        if (studentDetail.getStudentsCourseList() != null) {
+          List<StudentCourse> requestCourses = studentDetail.getStudentsCourseList();
             boolean hasExistingCourses = !existingCourses.isEmpty();
-            for (StudentCourse course : studentDetail.getStudentCourses()) {
+            for (StudentCourse course : studentDetail.getStudentsCourseList()) {
 
               if (course.getCourseName() == null || course.getCourseName().isBlank()) {
                 continue;
