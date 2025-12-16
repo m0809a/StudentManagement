@@ -19,6 +19,7 @@ public interface StudentRepository {
    *
    * @return　受講生一覧（全件）
    */
+  @Select("SELECT * FROM students WHERE deleted = false")
   List<Student> findAllActiveStudents();
 
 
@@ -28,6 +29,7 @@ public interface StudentRepository {
    * @param id　受講生ID
    * @return　受講生
    */
+  @Select("SELECT * FROM students WHERE id = #{id}")
   Student findStudentById(String id);
 
 
