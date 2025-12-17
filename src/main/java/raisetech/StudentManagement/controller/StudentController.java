@@ -62,8 +62,6 @@ public class StudentController {
    */
   @PostMapping("/registerStudent")
   public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail){
-
-
     StudentDetail responseStudentDetail = service.registerStudentWithNewId(studentDetail);
     return ResponseEntity.ok(responseStudentDetail);
   }
