@@ -9,6 +9,7 @@ import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 /**
@@ -47,6 +48,9 @@ import raisetech.StudentManagement.repository.StudentRepository;
    */
   public StudentDetail getStudentDetail(String id) {
     Student student = repository.findStudentById(id);
+    if (student == null){
+      throw new StudentNotFoundException("受講生IDが無効です。");
+    }
     List<StudentCourse> courses = repository.findCoursesByStudentId(student.getId());
     return new StudentDetail(student, courses);
   }

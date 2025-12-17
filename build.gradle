@@ -35,6 +35,9 @@ dependencies {
     //Thymeleaf
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
     //Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
