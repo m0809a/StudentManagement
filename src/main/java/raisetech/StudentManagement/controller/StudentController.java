@@ -1,7 +1,9 @@
 package raisetech.StudentManagement.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +56,10 @@ public class StudentController {
    * @return　受講生
    */
   @GetMapping("/student/{id}")
-  public StudentDetail getStudent(@PathVariable @Size(min = 7, max = 7) String id){
+  public StudentDetail getStudent(
+      @PathVariable
+      @NotBlank
+      @Pattern(regexp = "S\\d{6}",message = "IDは6桁で入力してください。") String id){
     return service.getStudentDetail(id);
   }
 
