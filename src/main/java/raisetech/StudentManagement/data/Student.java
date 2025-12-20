@@ -12,7 +12,6 @@ import lombok.Setter;
 @Setter
 public class Student {
 
-  @NotBlank
   @Pattern(regexp = "S\\d{6}")
   private String id;
 
