@@ -49,7 +49,7 @@ import raisetech.StudentManagement.repository.StudentRepository;
   public StudentDetail getStudentDetail(String id) {
     Student student = repository.findStudentById(id);
     if (student == null){
-      throw new StudentNotFoundException("受講生IDが無効です。");
+      throwStudentNotFound(id);
     }
     List<StudentCourse> courses = repository.findCoursesByStudentId(student.getId());
     return new StudentDetail(student, courses);
@@ -167,7 +167,11 @@ import raisetech.StudentManagement.repository.StudentRepository;
 
       repository.insertStudentCourses(newCourse);
     }
+
+  public String throwStudentNotFound(String id){
+    throw new StudentNotFoundException("受講生IDが無効です。" + id);
   }
+}
 
 
 
