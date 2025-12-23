@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
 	id 'war'
-	id 'org.springframework.boot' version '3.5.7'
+	id 'org.springframework.boot' version '3.3.4'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -28,15 +28,16 @@ repositories {
 dependencies {
     //Spring Boot
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+    //Thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // OpenAPI Generator
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
     //Apache Commons lang 便利機能、ユーティリティ
     implementation 'org.apache.commons:commons-lang3:3.19.0'
-
-    //Thymeleaf
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-
-    // Validation
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     //Lombok
     compileOnly 'org.projectlombok:lombok'

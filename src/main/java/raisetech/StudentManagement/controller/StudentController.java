@@ -1,5 +1,10 @@
 package raisetech.StudentManagement.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
@@ -25,10 +31,10 @@ import raisetech.StudentManagement.service.StudentService;
  */
 @Validated
 @RestController
+@Tag(name = "Student API", description = "受講生管理API")
 public class StudentController {
 
-  private StudentService service;
-
+  private final StudentService service;
 
   @Autowired
   public StudentController(StudentService service) {
@@ -36,59 +42,80 @@ public class StudentController {
   }
 
   /**
-   * 受講生詳細の一覧検索です。
-   * 全件検索を行うので、条件指定は行いません。
-   *
-   * @return　受講生詳細一覧（全件）
-   *
+   * 受講生一覧取得
    */
+  @Operation(
+      summary = "受講生一覧取得",
+      description = "キャンセルされていない受講生の一覧を取得します。"
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "取得成功"),
+      @ApiResponse(responseCode = "500", description = "サーバーエラー")
+  })
   @GetMapping("/students")
-  public List<StudentDetail>getStudentList() {
+  public List<StudentDetail> getStudentList() {
     return service.getAllStudent();
   }
 
-
   /**
-   * 受講生詳細の検索です。
-   * IDに紐付く任意の受講生の情報を取得します。
-   *
-   * @param id　受講生ID
-   * @return　受講生
+   * 受講生詳細取得
    */
-  @GetMapping("/student/{id}")
+  @Operation(
+      summary = "受講生詳細取得",
+      description = "受講生IDを指定して、受講生の詳細情報を取得します。"
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "取得成功"),
+      @ApiResponse(responseCode = "400", description = "ID形式不正"),
+      @ApiResponse(responseCode = "404", description = "受講生が存在しない")
+  })
+  @GetMapping("student/{id}")
   public StudentDetail getStudent(
+      @Parameter(description = "受講生ID（S + 6桁）", example = "S000001")
       @PathVariable
-      @NotBlank
-      @Pattern(regexp = "S\\d{6}",message = "IDは6桁で入力してください。") String id){
+      @NotBlank(message = "IDは必須です。")
+      @Pattern(regexp = "S\\d{6}", message = "IDはS + 6桁で入力してください。")
+      String id) {
+
     return service.getStudentDetail(id);
   }
 
-
   /**
-   * 受講生詳細の登録です。
-   *
-   * @param studentDetail　受講生詳細
-   * @return　実行結果
+   * 受講生登録
    */
-  @PostMapping("/registerStudent")
-  public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail){
-    StudentDetail responseStudentDetail = service.registerStudentWithNewId(studentDetail);
-    return ResponseEntity.ok(responseStudentDetail);
+  @Operation(
+      summary = "受講生登録",
+      description = "受講生を新規登録します。IDは自動採番されます。"
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "登録成功"),
+      @ApiResponse(responseCode = "400", description = "入力チェックエラー")
+  })
+  @PostMapping("student/register")
+  public ResponseEntity<StudentDetail> registerStudent(
+      @RequestBody @Valid StudentDetail studentDetail) {
+
+    StudentDetail response = service.registerStudentWithNewId(studentDetail);
+    return ResponseEntity.ok(response);
   }
 
-
   /**
-   * 受講生詳細の更新を行います。キャンセルフラグの更新もここで行います。（理論削除）
-   *
-   * @param studentDetail　受講生詳細
-   * @return　実行結果
+   * 受講生更新
    */
-  @PutMapping("/student/update")
-  public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail) {
+  @Operation(
+      summary = "受講生更新",
+      description = "受講生情報を更新します。キャンセル（論理削除）も含みます。"
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "更新成功"),
+      @ApiResponse(responseCode = "400", description = "入力チェックエラー"),
+      @ApiResponse(responseCode = "404", description = "受講生が存在しない")
+  })
+  @PutMapping("student/update")
+  public ResponseEntity<String> updateStudent(
+      @RequestBody @Valid StudentDetail studentDetail) {
+
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
   }
-
-
-
 }
