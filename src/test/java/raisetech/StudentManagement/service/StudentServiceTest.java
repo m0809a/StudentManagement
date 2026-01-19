@@ -248,6 +248,15 @@ class StudentServiceTest {
     var insertCaptor = org.mockito.ArgumentCaptor.forClass(StudentCourse.class);
     verify(repository, times(1)).insertStudentCourses(insertCaptor.capture());
 
+    StudentCourse inserted = insertCaptor.getValue();
+    assertEquals("S999999", inserted.getStudentId());
+    assertEquals("C000001", inserted.getId()); // Java入門コース
+    assertEquals("Java入門コース", inserted.getCourseName());
+    assertNotNull(inserted.getCourseStartAt());
+    assertNotNull(inserted.getCourseEndAt());
+    assertFalse(inserted.isDeleted());
+
+
 
 
   }
