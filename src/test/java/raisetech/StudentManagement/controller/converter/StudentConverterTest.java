@@ -26,14 +26,14 @@ class StudentConverterTest {
     course.setId("C999999");
     course.setStudentId("S999999");
 
-    List<StudentDetail> result = sut.convertStudentDetails(
+    List<StudentDetail> actual = sut.convertStudentDetails(
         List.of(student),
         List.of(course)
     );
 
-    assertEquals(1, result.size());
+    assertEquals(1, actual.size());
 
-    StudentDetail detail = result.get(0);
+    StudentDetail detail = actual.get(0);
     assertEquals(student, detail.getStudent());
     assertEquals(1, detail.getStudentsCourseList().size());
     assertEquals(course, detail.getStudentsCourseList().get(0));
