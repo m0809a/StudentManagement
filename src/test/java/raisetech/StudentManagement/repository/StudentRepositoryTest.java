@@ -58,17 +58,18 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生の登録が行えること(){
-    Student student = new Student();
-    student.setId("S999999");
-    student.setName("てすと");
-    student.setKanaName("テスト");
-    student.setNickname("テス");
-    student.setEmail("test@example.com");
-    student.setAddress("東京都");
-    student.setAge(33);
-    student.setGender("男");
-    student.setRemark("");
-    student.setDeleted(false);
+    Student student = new Student(
+        "S999999",
+    "てすと",
+    "テスト",
+    "テス",
+    "test@example.com",
+    "東京都",
+    33,
+    "男",
+    "",
+    false
+    );
 
     sut.insertStudent(student);
 
@@ -78,7 +79,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生IDに紐付くコース情報が登録できること(){
+  void 受講生IDに紐付くコース情報が登録できること() {
     StudentCourse course = new StudentCourse();
     course.setId("C999999");
     course.setStudentId("S000001");
@@ -87,26 +88,30 @@ class StudentRepositoryTest {
     sut.insertStudentCourses(course);
 
     List<StudentCourse> actual = sut.findCoursesByStudentId("S000001");
-    assertThat(actual).anySatisfy(c -> {
-      assertThat(c.getId()).isEqualTo("C999999");
-      assertThat(c.getCourseName()).isEqualTo("テストコース");
-      assertThat(c.getStudentId()).isEqualTo("S000001");
-    });
+
+    StudentCourse expected = new StudentCourse();
+    expected.setId("C999999");
+    expected.setStudentId("S000001");
+    expected.setCourseName("テストコース");
+
+    assertThat(actual).contains(expected);
   }
+
 
   @Test
   void 受講生情報の更新が出来ること(){
-    Student student = new Student();
-    student.setId("S000001");
-    student.setName("更新テスト");
-    student.setKanaName("コウシンテスト");
-    student.setNickname("タロ");
-    student.setEmail("ymd@gmail.com");
-    student.setAddress("東京都千代田区");
-    student.setAge(34);
-    student.setGender("男");
-    student.setRemark("");
-    student.setDeleted(false);
+    Student student = new Student(
+    "S000001",
+    "更新テスト",
+    "コウシンテスト",
+    "タロ",
+    "ymd@gmail.com",
+    "東京都千代田区",
+    34,
+    "男",
+    "",
+    false
+    );
 
     sut.updateStudent(student);
 

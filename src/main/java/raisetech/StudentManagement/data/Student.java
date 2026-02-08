@@ -39,5 +39,27 @@ public class Student {
 
   private String remark;
 
-  private boolean deleted;   //論理削除　SQL:update  altertableでテーブル更新可能
+  private boolean deleted;   //論理削除　
+
+
+  public Student() {
+    }
+
+  public Student(String id, String name, String kanaName, String nickname,
+      String email, String address, int age, String gender,
+      String remark, boolean deleted) {
+    this.id = id;
+    this.name = name;
+    this.kanaName = kanaName;
+    this.nickname = nickname;
+    this.email = email;
+    this.address = address;
+    this.age = age;
+    this.gender = gender;
+    this.remark = remark;
+    this.deleted = deleted;
+  }
 }
+
+
+
