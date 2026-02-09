@@ -2,6 +2,7 @@ package raisetech.StudentManagement.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,9 +111,12 @@ import raisetech.StudentManagement.repository.StudentRepository;
     if (course.getCourseName() == null || course.getCourseName().isBlank()) {
       return;
     }
+    // student_course_id
+    course.setId(UUID.randomUUID().toString());
 
+    // course_id,Student_id
     String fixedCourseId = getCourseIdByName(course.getCourseName());
-    course.setId(fixedCourseId);
+    course.setCourseId(fixedCourseId);
     course.setStudentId(studentDetail.getStudent().getId());
     LocalDate now = LocalDate.now();
     course.setCourseStartAt(now);
@@ -159,7 +163,8 @@ import raisetech.StudentManagement.repository.StudentRepository;
         return;
       }
 
-      newCourse.setId(getCourseIdByName(newCourse.getCourseName()));
+      newCourse.setId(UUID.randomUUID().toString());
+      newCourse.setCourseId(getCourseIdByName(newCourse.getCourseName()));
       newCourse.setStudentId(studentDetail.getStudent().getId());
       newCourse.setCourseStartAt(LocalDate.now());
       newCourse.setCourseEndAt(LocalDate.now().plusYears(1));
