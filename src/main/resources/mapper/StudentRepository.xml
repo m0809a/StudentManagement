@@ -63,20 +63,12 @@
   </update>
 
 
-  <!-- 受講生のコース情報を更新 -->
-  <update id="updateStudentCourses" parameterType="raisetech.StudentManagement.data.StudentCourse">
-   UPDATE students_courses
-    SET course_name = #{courseName},
-        course_start_at = #{courseStartAt},
-        course_end_at = #{courseEndAt}
-    WHERE id = #{id}
-  </update>
 
   <!-- 受講生のコース情報を理論削除 -->
   <update id="updateStudentCourseDeleted" parameterType="raisetech.StudentManagement.data.StudentCourse">
-   UPDATE students_courses
+    UPDATE students_courses
 　    SET  deleted = true
-   WHERE id = #{id}
+    WHERE id = #{id}
   </update>
 
 

@@ -78,16 +78,9 @@ public interface StudentRepository {
   void updateStudent(Student student);
 
 
-  /**
-   * 受講生IDに紐付く受講コース情報を更新します。
-   *
-   * @param studentCourse　受講コース情報
-   */
-  void updateStudentCourses(StudentCourse studentCourse);
-
 
   /**
-   * キャンセルされた受講生の受講生IDに紐付く受講コース情報をキャンセルします。
+   * 指定した受講生IDに紐付く受講コース情報をキャンセルします。
    *
    * @param studentCourse　受講コース情報
    */
