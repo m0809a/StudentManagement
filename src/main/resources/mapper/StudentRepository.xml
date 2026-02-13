@@ -92,4 +92,30 @@
   </update>
 
 
+
+  <!-- 受講生コースの申し込み状況を取得 -->
+  <select id="findStatusByStudentCourseId" parameterType="raisetech.StudentManagement.data.StudentCourseStatus">
+    SELECT status
+    FROM students_course_status
+    WHERE student_course_id = #{studentCourseId}
+    AND deleted = 0
+  </select>
+
+  <!-- コース登録時に申込状況を登録（初期値：TEMP） -->
+  <insert id="insertCourseStatus" parameterType="raisetech.StudentManagement.data.StudentCourseStatus">
+    INSERT INTO students_course_status
+    (status_id, student_course_id, status, deleted)
+    VALUES
+    (#{statusId}, #{studentCourseId}, #{status}, #{deleted})
+  </insert>
+
+  <!-- コースの申込状況を更新 -->
+  <update id="updateCourseStatus" parameterType="raisetech.StudentManagement.data.StudentCourseStatus">
+    UPDATE students_course_status
+    SET status = #{status}
+    WHERE student_course_id = #{studentCourseId}
+    AND deleted = 0
+  </update>
+
+
   </mapper>
