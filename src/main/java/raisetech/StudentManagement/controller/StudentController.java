@@ -23,8 +23,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.domain.StudentCourseInfo;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.service.StudentService;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
+import raisetech.StudentManagement.domain.StudentSearchCondition;
+
 
 /**
  * 受験生の検索や登録、更新などを行うREST　APIとして受け付けるControllerです。
@@ -81,6 +86,16 @@ public class StudentController {
   }
 
   /**
+   * 受講生検索（複数条件）
+   * @param cond
+   * @return
+   */
+  @PostMapping("/students/search")
+  public List<StudentDetail> searchStudents(@RequestBody StudentSearchCondition cond) {
+    return service.searchStudents(cond);
+  }
+
+  /**
    * 受講生登録
    */
   @Operation(
@@ -117,5 +132,23 @@ public class StudentController {
 
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
+  }
+
+  @PutMapping("student/courseStatus/update/{studentId}/{courseId}/{status}")
+  public ResponseEntity<String> updateCourseStatus(
+      @PathVariable String studentId,
+      @PathVariable String courseId,
+      @PathVariable String status) {
+
+    service.updateCourseStatus(studentId, courseId, status);
+    return ResponseEntity.ok("ステータス更新成功");
+  }
+
+  @GetMapping("student/courseInfo/{studentId}/{courseId}")
+  public StudentCourseInfo getStudentCourseInfo(
+      @PathVariable String studentId,
+      @PathVariable String courseId) {
+
+    return service.getStudentCourseInfo(studentId, courseId);
   }
 }
