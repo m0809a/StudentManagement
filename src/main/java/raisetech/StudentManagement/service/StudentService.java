@@ -163,6 +163,7 @@ import raisetech.StudentManagement.repository.StudentRepository;
     LocalDate now = LocalDate.now();
     course.setCourseStartAt(now);
     course.setCourseEndAt(now.plusYears(1));
+    course.setCourseStatus("TEMP");
     repository.insertStudentCourses(course);
 
 

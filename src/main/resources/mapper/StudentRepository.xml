@@ -21,8 +21,8 @@
     FROM students_courses sc
     LEFT JOIN students_course_status s
     ON s.student_course_id = sc.student_course_id
-    AND s.deleted = 0
-    WHERE sc.deleted = 0
+    AND s.deleted = false
+    WHERE sc.deleted = false
   </select>
 
 
@@ -47,9 +47,9 @@
     FROM students_courses sc
     LEFT JOIN students_course_status s
     ON s.student_course_id = sc.student_course_id
-    AND s.deleted = 0
+    AND s.deleted = false
     WHERE sc.student_id = #{studentId}
-    AND sc.deleted = 0
+    AND sc.deleted = false
   </select>
 
   <!--条件にあう受講生を複数検索します-->
@@ -63,15 +63,15 @@
     <if test="(courseId != null and courseId != '') or (status != null and status != '')">
       INNER JOIN students_courses sc
       ON sc.student_id = s.id
-      AND sc.deleted = 0
+      AND sc.deleted = false
       LEFT JOIN students_course_status st
       ON st.student_course_id = sc.student_course_id
-      AND st.deleted = 0
+      AND st.deleted = false
     </if>
 
     <where>
       <if test="includeCanceledStudents == null or includeCanceledStudents == false">
-        s.deleted = 0
+        s.deleted = false
       </if>
 
       <if test="name != null and name != ''">
@@ -120,9 +120,9 @@
 
     LEFT JOIN students_course_status st
     ON st.student_course_id = sc.student_course_id
-    AND st.deleted = 0
+    AND st.deleted = false
 
-    WHERE sc.deleted = 0
+    WHERE sc.deleted = false
 
     <if test="courseId != null and courseId != ''">
       AND sc.course_id = #{courseId}
@@ -179,7 +179,7 @@
     FROM students_courses
     WHERE student_id = #{studentId}
     AND course_id = #{courseId}
-    AND deleted = 0
+    AND deleted = false
   </select>
 
 
@@ -198,7 +198,7 @@
     SELECT status
     FROM students_course_status
     WHERE student_course_id = #{studentCourseId}
-    AND deleted = 0
+    AND deleted = false
   </select>
 
   <!-- コース登録時に申込状況を登録（初期値：TEMP） -->
@@ -214,13 +214,13 @@
     UPDATE students_course_status
     SET status = #{status}
     WHERE student_course_id = #{studentCourseId}
-    AND deleted = 0
+    AND deleted = false
   </update>
 
   <!-- 申込状況を論理削除 -->
   <update id="updateCourseStatusDeleted" parameterType="raisetech.StudentManagement.data.StudentCourseStatus">
     UPDATE students_course_status
-    SET deleted = 1
+    SET deleted = true
     WHERE student_course_id = #{studentCourseId}
   </update>
 
@@ -235,12 +235,12 @@
     FROM students s
     INNER JOIN students_courses sc
     ON sc.student_id = s.id
-    AND sc.deleted = 0
+    AND sc.deleted = false
     LEFT JOIN students_course_status st
     ON st.student_course_id = sc.student_course_id
-    AND st.deleted = 0
+    AND st.deleted = false
     WHERE s.id = #{studentId}
-    AND s.deleted = 0
+    AND s.deleted = false
     AND sc.course_id = #{courseId}
   </select>
 
