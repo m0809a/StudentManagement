@@ -6,17 +6,19 @@ import static org.mockito.Mockito.times;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.data.StudentCourseStatus;
+import raisetech.StudentManagement.domain.StudentCourseInfo;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.domain.StudentSearchCondition;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
 
@@ -29,15 +31,15 @@ class StudentServiceTest {
   @Mock
   private StudentConverter converter;
 
-  private  StudentService sut;
+  private StudentService sut;
 
   @BeforeEach
-  void before(){
+  void before() {
     sut = new StudentService(repository, converter);
   }
 
   @Test
-  void 受講生詳細の一覧検索＿RepositoryとConverterの処理が適切に呼び出せていること(){
+  void 受講生詳細の一覧検索＿RepositoryとConverterの処理が適切に呼び出せていること() {
     List<Student> studentList = new ArrayList<>();
     List<StudentCourse> studentCourseList = new ArrayList<>();
 
@@ -52,7 +54,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void  受講生検索＿IDが存在する場合＿受講生とコースを取得しStudentDetailを返すこと(){
+  void 受講生検索＿IDが存在する場合＿受講生とコースを取得しStudentDetailを返すこと() {
     // Arrange
     String id = "S999999";
     Student student = new Student();
@@ -83,15 +85,13 @@ class StudentServiceTest {
     assertThrows(StudentNotFoundException.class,
         () -> sut.getStudentDetail(id));
 
-    // Assert（後続処理が呼ばれないこと）
     verify(repository, times(1)).findStudentById(id);
     verify(repository, never()).findCoursesByStudentId(any());
   }
 
 
-
   @Test
-  void 受講生詳細の登録_既存IDが無い場合_受け取った受講生情報とコース情報を登録しStudentDetailを返すこと(){
+  void 受講生詳細の登録_既存IDが無い場合_受け取った受講生情報とコース情報を登録しStudentDetailを返すこと() {
     // Arrange
     Student student = new Student();
     StudentDetail detail = new StudentDetail(student, new ArrayList<>());
@@ -104,19 +104,134 @@ class StudentServiceTest {
     // Act
     StudentDetail actual = sut.registerStudentWithNewId(detail);
 
-     // Check
-    assertEquals("S000001", student.getId());
+    // Assert（採番）
     assertEquals("S000001", actual.getStudent().getId());
     assertEquals("S000001", course.getStudentId());
-    assertEquals("C000001", course.getId());
-    assertNotNull(course.getCourseStartAt());
-    assertNotNull(course.getCourseEndAt());
 
-    verify(repository, times(1)).findMaxStudentId();
+    // insertStudent呼び出し
     verify(repository, times(1)).insertStudent(student);
-    verify(repository, times(1)).insertStudentCourses(course);
+
+    // insertStudentCourses の中身を検証（idはUUID、courseIdがC000001）
+    ArgumentCaptor<StudentCourse> courseCaptor = ArgumentCaptor.forClass(StudentCourse.class);
+    verify(repository, times(1)).insertStudentCourses(courseCaptor.capture());
+
+    StudentCourse insertedCourse = courseCaptor.getValue();
+    assertEquals("S000001", insertedCourse.getStudentId());
+    assertEquals("Java入門コース", insertedCourse.getCourseName());
+    assertEquals("C000001", insertedCourse.getCourseId());
+    assertNotNull(insertedCourse.getId());
+    assertNotNull(insertedCourse.getCourseStartAt());
+    assertNotNull(insertedCourse.getCourseEndAt());
+    assertEquals(insertedCourse.getCourseStartAt().plusYears(1), insertedCourse.getCourseEndAt());
+
+    // insertCourseStatus の検証
+    ArgumentCaptor<StudentCourseStatus> statusCaptor = ArgumentCaptor.forClass(
+        StudentCourseStatus.class);
+    verify(repository, times(1)).insertCourseStatus(statusCaptor.capture());
+
+    StudentCourseStatus insertedStatus = statusCaptor.getValue();
+    assertNotNull(insertedStatus.getStatusId());
+    assertEquals(insertedCourse.getId(), insertedStatus.getStudentCourseId());
+    assertEquals("TEMP", insertedStatus.getStatus());
+    assertFalse(insertedStatus.isDeleted());
+
 
   }
+
+  @Test
+  void コース申込み情報検索＿正常＿受講生コース情報の申し込み状況を取得しstudentCourseInfoを返すこと(){
+    StudentCourseInfo info = new StudentCourseInfo("S999999","テスト","C000001","Java入門コース","TEMP");
+    when(repository.findStudentCourseInfo("S999999","C000001")).thenReturn(info);
+
+    StudentCourseInfo actual = sut.getStudentCourseInfo("S999999", "C000001");
+
+    assertEquals(info, actual);
+    verify(repository, times(1)).findStudentCourseInfo("S999999", "C000001");
+  }
+
+  @Test
+  void 受講生コース情報取得_infoがnullの場合_StudentNotFoundExceptionが発生すること() {
+    // Arrange
+    when(repository.findStudentCourseInfo("S888888", "C000001")).thenReturn(null);
+
+    // Act & Assert
+    StudentNotFoundException ex = assertThrows(
+        StudentNotFoundException.class,
+        () -> sut.getStudentCourseInfo("S888888", "C000001")
+    );
+    assertTrue(ex.getMessage().contains("該当する受講生/コースが見つかりません"));
+
+    verify(repository, times(1)).findStudentCourseInfo("S888888", "C000001");
+  }
+
+  @Test
+  void 受講生コース情報取得_statusがnullの場合_StudentNotFoundExceptionが発生すること() {
+    // Arrange（statusだけnull）
+    StudentCourseInfo info =
+        new StudentCourseInfo("S000001", "山田太郎", "C000001", "Java入門コース", null);
+    when(repository.findStudentCourseInfo("S000001", "C000001")).thenReturn(info);
+
+    // Act & Assert
+    StudentNotFoundException ex = assertThrows(
+        StudentNotFoundException.class,
+        () -> sut.getStudentCourseInfo("S000001", "C000001")
+    );
+    assertTrue(ex.getMessage().contains("申込状況が未登録です"));
+
+    verify(repository, times(1)).findStudentCourseInfo("S000001", "C000001");
+  }
+
+  @Test
+  void 受講生検索＿コースIDまたはステータス条件あり＿searchStudentCoursesが呼ばれること() {
+    // Arrange
+    StudentSearchCondition cond = new StudentSearchCondition();
+    cond.setCourseId("C000001"); // コースID条件あり
+
+    List<Student> students = List.of(new Student());
+    List<StudentCourse> courses = List.of(new StudentCourse());
+    List<StudentDetail> converted = List.of(new StudentDetail());
+
+    when(repository.searchStudents(cond)).thenReturn(students);
+    when(repository.searchStudentCourses(cond)).thenReturn(courses);
+    when(converter.convertStudentDetails(students, courses)).thenReturn(converted);
+
+    // Act
+    List<StudentDetail> actual = sut.searchStudents(cond);
+
+    // Assert
+    assertEquals(converted, actual);
+    verify(repository, times(1)).searchStudents(cond);
+    verify(repository, times(1)).searchStudentCourses(cond);
+    verify(repository, never()).findAllActiveCourses();
+    verify(converter, times(1)).convertStudentDetails(students, courses);
+  }
+
+  @Test
+  void 受講生検索＿コースIDもステータスも未指定＿findAllActiveCoursesが呼ばれること() {
+    // Arrange
+    StudentSearchCondition cond = new StudentSearchCondition();
+    cond.setCourseId("");  // blank
+    cond.setStatus(null);  // null
+
+    List<Student> students = List.of(new Student());
+    List<StudentCourse> courses = List.of(new StudentCourse());
+    List<StudentDetail> converted = List.of(new StudentDetail());
+
+    when(repository.searchStudents(cond)).thenReturn(students);
+    when(repository.findAllActiveCourses()).thenReturn(courses);
+    when(converter.convertStudentDetails(students, courses)).thenReturn(converted);
+
+    // Act
+    List<StudentDetail> actual = sut.searchStudents(cond);
+
+    // Assert
+    assertEquals(converted, actual);
+    verify(repository, times(1)).searchStudents(cond);
+    verify(repository, never()).searchStudentCourses(cond);
+    verify(repository, times(1)).findAllActiveCourses();
+    verify(converter, times(1)).convertStudentDetails(students, courses);
+  }
+
 
   @Test
   void 受講生詳細の登録_既存IDがある場合_受け取った受講生情報とコース情報を登録しStudentDetailを返すこと() {
@@ -132,17 +247,36 @@ class StudentServiceTest {
     // Act
     StudentDetail actual = sut.registerStudentWithNewId(detail);
 
-    // Assert
-    assertEquals("S000011", student.getId());
+    // Assert（採番）
     assertEquals("S000011", actual.getStudent().getId());
     assertEquals("S000011", course.getStudentId());
-    assertEquals("C000001", course.getId());
-    assertNotNull(course.getCourseStartAt());
-    assertNotNull(course.getCourseEndAt());
 
-    verify(repository, times(1)).findMaxStudentId();
+    // insertStudent呼び出し
     verify(repository, times(1)).insertStudent(student);
-    verify(repository, times(1)).insertStudentCourses(course);
+
+    // insertStudentCourses の中身を検証（idはUUID、courseIdがC000001）
+    ArgumentCaptor<StudentCourse> courseCaptor = ArgumentCaptor.forClass(StudentCourse.class);
+    verify(repository, times(1)).insertStudentCourses(courseCaptor.capture());
+
+    StudentCourse insertedCourse = courseCaptor.getValue();
+    assertEquals("S000011", insertedCourse.getStudentId());
+    assertEquals("Java入門コース", insertedCourse.getCourseName());
+    assertEquals("C000001", insertedCourse.getCourseId());
+    assertNotNull(insertedCourse.getId());
+    assertNotNull(insertedCourse.getCourseStartAt());
+    assertNotNull(insertedCourse.getCourseEndAt());
+    assertEquals(insertedCourse.getCourseStartAt().plusYears(1), insertedCourse.getCourseEndAt());
+
+    // insertCourseStatus の検証
+    ArgumentCaptor<StudentCourseStatus> statusCaptor = ArgumentCaptor.forClass(
+        StudentCourseStatus.class);
+    verify(repository, times(1)).insertCourseStatus(statusCaptor.capture());
+
+    StudentCourseStatus insertedStatus = statusCaptor.getValue();
+    assertNotNull(insertedStatus.getStatusId());
+    assertEquals(insertedCourse.getId(), insertedStatus.getStudentCourseId());
+    assertEquals("TEMP", insertedStatus.getStatus());
+    assertFalse(insertedStatus.isDeleted());
   }
 
 
@@ -156,7 +290,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の更新＿受講生キャンセルの場合＿受講生情報とそれに紐付くコース情報を論理削除すること(){
+  void 受講生詳細の更新＿受講生キャンセルの場合＿受講生情報とそれに紐付くコース情報を論理削除すること() {
     // Arrange
     Student student = new Student();
     student.setId("S999999");
@@ -178,11 +312,15 @@ class StudentServiceTest {
     verify(repository, times(1)).updateStudent(student);
     verify(repository, times(1)).findCoursesByStudentId("S999999");
     verify(repository, times(1)).updateStudentCourseDeleted(any(StudentCourse.class));
+    verify(repository, times(1)).updateCourseStatusDeleted("C999999");
+
     verify(repository, never()).insertStudentCourses(any());
+    verify(repository, never()).insertCourseStatus(any());
   }
 
+
   @Test
-  void 受講生詳細の更新＿コース指定なし＿受講生情報のみ更新すること(){
+  void 受講生詳細の更新＿コース指定なし＿受講生情報のみ更新すること() {
     // Arrange
     Student student = new Student();
     student.setId("S999999");
@@ -206,13 +344,13 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の更新＿コース変更の場合＿既存コースを論理削除し新コースを登録すること(){
+  void 受講生詳細の更新＿コース変更の場合＿既存コースと申込状況を論理削除し新コースとTEMPを登録すること() {
     // Arrange
     Student student = new Student();
     student.setId("S999999");
     student.setDeleted(false);
 
-      // 既存コース
+    // 既存コース
     StudentCourse existingCourse = new StudentCourse();
     existingCourse.setId("C999999");
     existingCourse.setStudentId("S999999");
@@ -220,8 +358,7 @@ class StudentServiceTest {
 
     when(repository.findCoursesByStudentId("S999999")).thenReturn(List.of(existingCourse));
 
-
-      // 新規コース
+    // 新規コース
     StudentCourse newCourse = new StudentCourse();
     newCourse.setCourseName("Java入門コース");
 
@@ -232,35 +369,82 @@ class StudentServiceTest {
     // Act
     sut.updateStudent(detail);
 
-    //Assert
+    // Assert
     verify(repository, times(1)).updateStudent(student);
     verify(repository, times(1)).findCoursesByStudentId("S999999");
 
     // 既存コースがdeleted=trueにされて渡されたか
-    var deletedCaptor = org.mockito.ArgumentCaptor.forClass(StudentCourse.class);
+    ArgumentCaptor<StudentCourse> deletedCaptor = ArgumentCaptor.forClass(StudentCourse.class);
     verify(repository, times(1)).updateStudentCourseDeleted(deletedCaptor.capture());
 
     StudentCourse deletedArg = deletedCaptor.getValue();
     assertEquals("C999999", deletedArg.getId());
     assertTrue(deletedArg.isDeleted());
+    verify(repository, times(1)).updateCourseStatusDeleted("C999999");
 
-    // 新コースが正しい形でinsertされたか
-    var insertCaptor = org.mockito.ArgumentCaptor.forClass(StudentCourse.class);
+    // 新コースが正しい形でinsertされたか（idはUUID、courseIdがC000001）
+    ArgumentCaptor<StudentCourse> insertCaptor = ArgumentCaptor.forClass(StudentCourse.class);
     verify(repository, times(1)).insertStudentCourses(insertCaptor.capture());
 
     StudentCourse inserted = insertCaptor.getValue();
     assertEquals("S999999", inserted.getStudentId());
-    assertEquals("C000001", inserted.getId()); // Java入門コース
     assertEquals("Java入門コース", inserted.getCourseName());
+    assertEquals("C000001", inserted.getCourseId()); // ★ここを見る（idじゃない）
+    assertNotNull(inserted.getId());
     assertNotNull(inserted.getCourseStartAt());
     assertNotNull(inserted.getCourseEndAt());
+    assertEquals(inserted.getCourseStartAt().plusYears(1), inserted.getCourseEndAt());
     assertFalse(inserted.isDeleted());
 
+    ArgumentCaptor<StudentCourseStatus> statusCaptor = ArgumentCaptor.forClass(
+        StudentCourseStatus.class);
+    verify(repository, times(1)).insertCourseStatus(statusCaptor.capture());
 
-
-
+    StudentCourseStatus insertedStatus = statusCaptor.getValue();
+    assertNotNull(insertedStatus.getStatusId());
+    assertEquals(inserted.getId(), insertedStatus.getStudentCourseId());
+    assertEquals("TEMP", insertedStatus.getStatus());
+    assertFalse(insertedStatus.isDeleted());
   }
 
+  @Test
+  void コースステータス更新＿不正ステータスの場合＿IllegalArgumentExceptionが発生すること() {
+    IllegalArgumentException ex = assertThrows(
+        IllegalArgumentException.class,
+        () -> sut.updateCourseStatus("S000001", "C000001", "NG")
+    );
+    assertTrue(ex.getMessage().contains("ステータスが不正です"));
 
+    // validateStatusで落ちるのでRepositoryは呼ばれない
+    verify(repository, never()).findStudentCourseId(any(), any());
+    verify(repository, never()).updateCourseStatus(any(), any());
+  }
+
+  @Test
+  void コースステータス更新＿studentCourseIdが見つからない場合＿StudentNotFoundExceptionが発生すること() {
+    when(repository.findStudentCourseId("S000001", "C000001")).thenReturn(null);
+
+    StudentNotFoundException ex = assertThrows(
+        StudentNotFoundException.class,
+        () -> sut.updateCourseStatus("S000001", "C000001", "TEMP")
+    );
+    assertTrue(ex.getMessage().contains("該当コースが存在しません"));
+
+    verify(repository, times(1)).findStudentCourseId("S000001", "C000001");
+    verify(repository, never()).updateCourseStatus(any(), any());
+  }
+
+  @Test
+  void コースステータス更新＿正常＿updateCourseStatusが呼ばれること() {
+    // Arrange
+    when(repository.findStudentCourseId("S000001", "C000001")).thenReturn("UUID-123");
+
+    // Act
+    sut.updateCourseStatus("S000001", "C000001", "FORMAL");
+
+    // Assert
+    verify(repository, times(1)).findStudentCourseId("S000001", "C000001");
+    verify(repository, times(1)).updateCourseStatus("UUID-123", "FORMAL");
+  }
 
 }

@@ -177,6 +177,10 @@ import raisetech.StudentManagement.repository.StudentRepository;
 
   }
 
+  /**
+   * 受講コースのstatusが正しい形式か判断します
+   * @param status
+   */
   private void validateStatus(String status) {
     switch (status) {
       case "TEMP", "FORMAL", "TAKING", "DONE" -> {
