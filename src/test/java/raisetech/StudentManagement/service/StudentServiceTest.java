@@ -104,14 +104,14 @@ class StudentServiceTest {
     // Act
     StudentDetail actual = sut.registerStudentWithNewId(detail);
 
-    // Assert（採番）
+    // Assert
     assertEquals("S000001", actual.getStudent().getId());
     assertEquals("S000001", course.getStudentId());
 
-    // insertStudent呼び出し
+    // insertStudent
     verify(repository, times(1)).insertStudent(student);
 
-    // insertStudentCourses の中身を検証（idはUUID、courseIdがC000001）
+    // insertStudentCoursesを検証（idはUUID、courseIdがC000001）
     ArgumentCaptor<StudentCourse> courseCaptor = ArgumentCaptor.forClass(StudentCourse.class);
     verify(repository, times(1)).insertStudentCourses(courseCaptor.capture());
 
@@ -171,7 +171,7 @@ class StudentServiceTest {
         new StudentCourseInfo("S000001", "山田太郎", "C000001", "Java入門コース", null);
     when(repository.findStudentCourseInfo("S000001", "C000001")).thenReturn(info);
 
-    // Act & Assert
+    // Act  Assert
     StudentNotFoundException ex = assertThrows(
         StudentNotFoundException.class,
         () -> sut.getStudentCourseInfo("S000001", "C000001")
@@ -247,11 +247,11 @@ class StudentServiceTest {
     // Act
     StudentDetail actual = sut.registerStudentWithNewId(detail);
 
-    // Assert（採番）
+    // Assert
     assertEquals("S000011", actual.getStudent().getId());
     assertEquals("S000011", course.getStudentId());
 
-    // insertStudent呼び出し
+    // insertStudent
     verify(repository, times(1)).insertStudent(student);
 
     // insertStudentCourses の中身を検証（idはUUID、courseIdがC000001）
@@ -267,7 +267,7 @@ class StudentServiceTest {
     assertNotNull(insertedCourse.getCourseEndAt());
     assertEquals(insertedCourse.getCourseStartAt().plusYears(1), insertedCourse.getCourseEndAt());
 
-    // insertCourseStatus の検証
+    // insertCourseStatus
     ArgumentCaptor<StudentCourseStatus> statusCaptor = ArgumentCaptor.forClass(
         StudentCourseStatus.class);
     verify(repository, times(1)).insertCourseStatus(statusCaptor.capture());
