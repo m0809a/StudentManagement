@@ -90,10 +90,11 @@ public class StudentController {
    * @param cond
    * @return
    */
-  @PostMapping("/students/search")
-  public List<StudentDetail> searchStudents(@RequestBody StudentSearchCondition cond) {
+  @GetMapping("/students/search")
+  public List<StudentDetail> search(StudentSearchCondition cond) {
     return service.searchStudents(cond);
   }
+
 
   /**
    * 受講生登録

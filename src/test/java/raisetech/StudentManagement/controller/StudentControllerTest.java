@@ -155,19 +155,16 @@ class StudentControllerTest {
   void 複数条件での受講生検索が実行できて空のリストが返ること() throws Exception {
     when(service.searchStudents(any(StudentSearchCondition.class))).thenReturn(List.of());
 
-    StudentSearchCondition cond = new StudentSearchCondition();
-    cond.setCourseId("C000001");
-
     mockMvc.perform(
-            post("/students/search")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(cond))
+            get("/students/search")
+                .param("courseId", "C000001")
         )
         .andExpect(status().isOk())
         .andExpect(content().json("[]"));
 
     verify(service, times(1)).searchStudents(any(StudentSearchCondition.class));
   }
+
 
   @Test
   void コースステータス更新が実行できて成功レスポンスが返ること() throws Exception {
