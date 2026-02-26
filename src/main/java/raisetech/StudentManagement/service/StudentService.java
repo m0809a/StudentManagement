@@ -71,7 +71,7 @@ import raisetech.StudentManagement.repository.StudentRepository;
       throw new StudentNotFoundException("該当する受講生/コースが見つかりません");
     }
     if (info.getStatus() == null) {
-      // statusが未登録のケース（基本はinsert）
+      // statusが未登録の場合
       throw new StudentNotFoundException("申込状況が未登録です");
     }
     return info;
