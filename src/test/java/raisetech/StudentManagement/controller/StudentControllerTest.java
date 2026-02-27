@@ -15,7 +15,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.domain.StudentCourseInfo;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.domain.StudentSearchCondition;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.service.StudentService;
 
@@ -147,6 +149,46 @@ class StudentControllerTest {
         .andExpect(content().string("更新処理が成功しました。"));
 
     verify(service, times(1)).updateStudent(any(StudentDetail.class));
+  }
+
+  @Test
+  void 複数条件での受講生検索が実行できて空のリストが返ること() throws Exception {
+    when(service.searchStudents(any(StudentSearchCondition.class))).thenReturn(List.of());
+
+    mockMvc.perform(
+            get("/students/search")
+                .param("courseId", "C000001")
+        )
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
+
+    verify(service, times(1)).searchStudents(any(StudentSearchCondition.class));
+  }
+
+
+  @Test
+  void コースステータス更新が実行できて成功レスポンスが返ること() throws Exception {
+    mockMvc.perform(put("/student/courseStatus/update/S000001/C000001/TEMP"))
+        .andExpect(status().isOk())
+        .andExpect(content().string("ステータス更新成功"));
+
+    verify(service, times(1)).updateCourseStatus("S000001", "C000001", "TEMP");
+  }
+
+  @Test
+  void 受講生コース情報取得が実行できて情報が返ること() throws Exception {
+    StudentCourseInfo info = new StudentCourseInfo(
+        "S000001", "山田太郎", "C000001", "Java入門コース", "TEMP"
+    );
+    when(service.getStudentCourseInfo("S000001", "C000001")).thenReturn(info);
+
+    mockMvc.perform(get("/student/courseInfo/S000001/C000001"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.studentId").value("S000001"))
+        .andExpect(jsonPath("$.courseId").value("C000001"))
+        .andExpect(jsonPath("$.status").value("TEMP"));
+
+    verify(service, times(1)).getStudentCourseInfo("S000001", "C000001");
   }
 
 

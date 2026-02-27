@@ -9,8 +9,22 @@
 
   <!-- 受講生コース情報の全件検索 -->
   <select id="findAllActiveCourses" resultType="raisetech.StudentManagement.data.StudentCourse">
-    SELECT * FROM students_courses WHERE deleted = false
+    SELECT
+    sc.student_course_id AS id,
+    sc.student_id        AS studentId,
+    sc.course_id         AS courseId,
+    sc.course_name       AS courseName,
+    sc.course_start_at   AS courseStartAt,
+    sc.course_end_at     AS courseEndAt,
+    sc.deleted           AS deleted,
+    s.status             AS courseStatus
+    FROM students_courses sc
+    LEFT JOIN students_course_status s
+    ON s.student_course_id = sc.student_course_id
+    AND s.deleted = false
+    WHERE sc.deleted = false
   </select>
+
 
 
   <!-- 受講生の単一検索 -->
@@ -18,9 +32,106 @@
    SELECT * FROM students WHERE id = #{id}
   </select>
 
-  <!-- 受講生の受講コースの単一検索 -->
-  <select id="findCoursesByStudentId" resultType="raisetech.StudentManagement.data.StudentCourse">
-    SELECT * FROM students_courses WHERE student_id = #{studentId}
+  <!-- 受講生ごとの受講コース検索 -->
+  <select id="findCoursesByStudentId"
+    resultType="raisetech.StudentManagement.data.StudentCourse">
+    SELECT
+    sc.student_course_id AS id,
+    sc.student_id        AS studentId,
+    sc.course_id         AS courseId,
+    sc.course_name       AS courseName,
+    sc.course_start_at   AS courseStartAt,
+    sc.course_end_at     AS courseEndAt,
+    sc.deleted           AS deleted,
+    s.status             AS courseStatus
+    FROM students_courses sc
+    LEFT JOIN students_course_status s
+    ON s.student_course_id = sc.student_course_id
+    AND s.deleted = false
+    WHERE sc.student_id = #{studentId}
+    AND sc.deleted = false
+  </select>
+
+  <!--条件にあう受講生を複数検索します-->
+  <select id="searchStudents"
+    parameterType="raisetech.StudentManagement.domain.StudentSearchCondition"
+    resultType="raisetech.StudentManagement.data.Student">
+
+    SELECT DISTINCT s.*
+    FROM students s
+
+    <if test="(courseId != null and courseId != '') or (status != null and status != '')">
+      INNER JOIN students_courses sc
+      ON sc.student_id = s.id
+      AND sc.deleted = false
+      LEFT JOIN students_course_status st
+      ON st.student_course_id = sc.student_course_id
+      AND st.deleted = false
+    </if>
+
+    <where>
+      <if test="includeCanceledStudents == null or includeCanceledStudents == false">
+        s.deleted = false
+      </if>
+
+      <if test="name != null and name != ''">
+        AND s.name LIKE CONCAT('%', #{name}, '%')
+      </if>
+
+      <if test="gender != null and gender != ''">
+        AND s.gender = #{gender}
+      </if>
+
+      <if test="courseId != null and courseId != ''">
+        AND sc.course_id = #{courseId}
+      </if>
+
+      <if test="status != null and status != ''">
+        AND st.status = #{status}
+      </if>
+
+      <if test="ageGroup == 'TEENS'">
+        AND s.age &lt;= 19
+      </if>
+      <if test="ageGroup == 'TWENTIES'">
+        AND s.age &gt;= 20 AND s.age &lt;= 29
+      </if>
+      <if test="ageGroup == 'THIRTIES'">
+        AND s.age &gt;= 30 AND s.age &lt;= 39
+      </if>
+    </where>
+  </select>
+
+  <!--条件に合う受講コース情報を検索-->
+  <select id="searchStudentCourses"
+    parameterType="raisetech.StudentManagement.domain.StudentSearchCondition"
+    resultType="raisetech.StudentManagement.data.StudentCourse">
+
+    SELECT
+    sc.student_course_id AS id,
+    sc.student_id        AS studentId,
+    sc.course_id         AS courseId,
+    sc.course_name       AS courseName,
+    sc.course_start_at   AS courseStartAt,
+    sc.course_end_at     AS courseEndAt,
+    sc.deleted           AS deleted,
+    st.status            AS courseStatus
+    FROM students_courses sc
+
+    LEFT JOIN students_course_status st
+    ON st.student_course_id = sc.student_course_id
+    AND st.deleted = false
+
+    WHERE sc.deleted = false
+
+    <if test="courseId != null and courseId != ''">
+      AND sc.course_id = #{courseId}
+    </if>
+
+    <if test="status != null and status != ''">
+      AND st.status = #{status}
+    </if>
+
   </select>
 
 
@@ -40,11 +151,12 @@
 
   <!-- 受講生の受講コースを登録 -->
   <insert id="insertStudentCourses" parameterType="raisetech.StudentManagement.data.StudentCourse">
-   INSERT INTO students_courses
-    (id, student_id, course_name, course_start_at, course_end_at)
-   VALUES
-    (#{id}, #{studentId}, #{courseName}, #{courseStartAt}, #{courseEndAt})
+    INSERT INTO students_courses
+    (student_course_id, student_id, course_id, course_name, course_start_at, course_end_at, deleted)
+    VALUES
+    (#{id}, #{studentId}, #{courseId}, #{courseName}, #{courseStartAt}, #{courseEndAt}, #{deleted})
   </insert>
+
 
 
   <!-- 受講生の情報を更新 -->
@@ -62,14 +174,75 @@
    WHERE id = #{id}
   </update>
 
+  <select id="findStudentCourseId" resultType="String">
+    SELECT student_course_id
+    FROM students_courses
+    WHERE student_id = #{studentId}
+    AND course_id = #{courseId}
+    AND deleted = false
+  </select>
+
 
 
   <!-- 受講生のコース情報を理論削除 -->
   <update id="updateStudentCourseDeleted" parameterType="raisetech.StudentManagement.data.StudentCourse">
     UPDATE students_courses
-　    SET  deleted = true
-    WHERE id = #{id}
+    　    SET  deleted = true
+    WHERE student_course_id = #{id}
   </update>
+
+
+
+  <!-- 受講生コースの申し込み状況を取得 -->
+  <select id="findStatusByStudentCourseId" parameterType="raisetech.StudentManagement.data.StudentCourseStatus">
+    SELECT status
+    FROM students_course_status
+    WHERE student_course_id = #{studentCourseId}
+    AND deleted = false
+  </select>
+
+  <!-- コース登録時に申込状況を登録（初期値：TEMP） -->
+  <insert id="insertCourseStatus" parameterType="raisetech.StudentManagement.data.StudentCourseStatus">
+    INSERT INTO students_course_status
+    (status_id, student_course_id, status, deleted)
+    VALUES
+    (#{statusId}, #{studentCourseId}, #{status}, #{deleted})
+  </insert>
+
+  <!-- コースの申込状況を更新 -->
+  <update id="updateCourseStatus" parameterType="raisetech.StudentManagement.data.StudentCourseStatus">
+    UPDATE students_course_status
+    SET status = #{status}
+    WHERE student_course_id = #{studentCourseId}
+    AND deleted = false
+  </update>
+
+  <!-- 申込状況を論理削除 -->
+  <update id="updateCourseStatusDeleted" parameterType="raisetech.StudentManagement.data.StudentCourseStatus">
+    UPDATE students_course_status
+    SET deleted = true
+    WHERE student_course_id = #{studentCourseId}
+  </update>
+
+  <!--コースの申し込み状況を取得-->
+  <select id="findStudentCourseInfo" resultType="raisetech.StudentManagement.domain.StudentCourseInfo">
+    SELECT
+    s.id           AS studentId,
+    s.name         AS studentName,
+    sc.course_id   AS courseId,
+    sc.course_name AS courseName,
+    st.status      AS status
+    FROM students s
+    INNER JOIN students_courses sc
+    ON sc.student_id = s.id
+    AND sc.deleted = false
+    LEFT JOIN students_course_status st
+    ON st.student_course_id = sc.student_course_id
+    AND st.deleted = false
+    WHERE s.id = #{studentId}
+    AND s.deleted = false
+    AND sc.course_id = #{courseId}
+  </select>
 
 
   </mapper>

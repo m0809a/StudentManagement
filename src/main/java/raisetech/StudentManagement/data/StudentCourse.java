@@ -15,38 +15,26 @@ public class StudentCourse {
 
   private String id;
   private String studentId;
+  private String courseId;
   private String courseName;
   private LocalDate courseStartAt;
   private LocalDate courseEndAt;
   private boolean deleted;
+  private String courseStatus;
 
 
   @Override
-  public boolean equals(Object o){
-
-    if(this == o)
-      return true;
-
-    if(this == null)
-      return false;
-
-    if(o == null)
-      return false;
-
-    if (getClass() != o.getClass()) return false;
-
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     StudentCourse other = (StudentCourse) o;
-
-    return Objects.equals(id, other.id)
-        && Objects.equals(studentId, other.studentId)
-        && Objects.equals(courseName, other.courseName);
+    return Objects.equals(id, other.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, studentId, courseName);
+    return Objects.hash(id);
   }
-
 
 
 }
