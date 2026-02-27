@@ -2,12 +2,8 @@ package raisetech.StudentManagement.repository;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
-import raisetech.StudentManagement.data.StudentCourseStatus;
-import raisetech.StudentManagement.domain.StudentCourseInfo;
-import raisetech.StudentManagement.domain.StudentSearchCondition;
 
 /**
  * 受講生テーブルと受講生コース情報テーブルと紐付くRepositoryです。
@@ -47,28 +43,6 @@ public interface StudentRepository {
    * @return　受講生IDの紐付く受講生コース情報
    */
   List<StudentCourse> findCoursesByStudentId(String studentId);
-
-
-  /**
-   * 様々な条件で受講生を検索します
-   * 名前（部分一致）
-   * 受講コース（courseId）
-   * コースステータス（TEMP/FORMAL/TAKING/DONE）
-   * キャンセル済みか否か（受講生自体のdeleted）
-   * 性別
-   * 年齢層（～19、20代、30代・・・）
-   * @param cond
-   * @return　条件に合う受講生詳細
-   */
-  List<Student> searchStudents(StudentSearchCondition cond);
-
-
-  /**
-   * 様々な条件で受講生コース情報を検索します
-   * @param cond
-   * @return　条件にあう受講生コース情報
-   */
-  List<StudentCourse>searchStudentCourses(StudentSearchCondition cond);
 
 
   /**
@@ -114,44 +88,9 @@ public interface StudentRepository {
 
 
 
-  /**
-   * コース登録時に申し込み状況を登録します。（初期値：TEMP・仮申込）
-   * @param status
-   */
-  void insertCourseStatus(StudentCourseStatus status);
 
 
-  /**
-   * 受講生のstudentIdとcourseIdからstudentCourseId(UUID)を取得します。
-   * @param studentId
-   * @param courseId
-   * @return
-   */
-  String findStudentCourseId(String studentId, String courseId);
 
-  /**
-   * コースの申し込み情報を更新します
-   * @param studentCourseId
-   * @param status
-   */
-  void updateCourseStatus(@Param("studentCourseId") String studentCourseId,
-      @Param("status") String status);
-
-
-  /**
-   * キャンセルされた受講コースに紐付く申し込み状況をキャンセルします
-   * @param studentCourseId
-   */
-  void updateCourseStatusDeleted(String studentCourseId);
-
-  /**
-   * 受講生コーズの申し込み状況のみを取得します
-   * @param studentId
-   * @param courseId
-   * @return
-   */
-  StudentCourseInfo findStudentCourseInfo(@Param("studentId") String studentId,
-      @Param("courseId") String courseId);
 
 }
 
