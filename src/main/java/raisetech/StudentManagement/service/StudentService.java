@@ -2,17 +2,13 @@ package raisetech.StudentManagement.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
-import raisetech.StudentManagement.data.StudentCourseStatus;
-import raisetech.StudentManagement.domain.StudentCourseInfo;
 import raisetech.StudentManagement.domain.StudentDetail;
-import raisetech.StudentManagement.domain.StudentSearchCondition;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
 
@@ -57,45 +53,6 @@ import raisetech.StudentManagement.repository.StudentRepository;
     }
     List<StudentCourse> courses = repository.findCoursesByStudentId(student.getId());
     return new StudentDetail(student, courses);
-  }
-
-  /**
-   * 受講生コース情報の申し込み情報を取得します。
-   * @param studentId
-   * @param courseId
-   * @return
-   */
-  public StudentCourseInfo getStudentCourseInfo(String studentId, String courseId) {
-    StudentCourseInfo info = repository.findStudentCourseInfo(studentId, courseId);
-    if (info == null) {
-      throw new StudentNotFoundException("該当する受講生/コースが見つかりません");
-    }
-    if (info.getStatus() == null) {
-      // statusが未登録の場合
-      throw new StudentNotFoundException("申込状況が未登録です");
-    }
-    return info;
-  }
-
-  /**
-   * 受講生を複数検索します
-   * @param cond
-   * @return
-   */
-  public List<StudentDetail> searchStudents(StudentSearchCondition cond) {
-
-    List<Student> students = repository.searchStudents(cond);
-    List<StudentCourse> courses;
-    if ((cond.getCourseId() != null && !cond.getCourseId().isBlank())
-        || (cond.getStatus() != null && !cond.getStatus().isBlank())) {
-
-      courses = repository.searchStudentCourses(cond);
-
-    } else {
-      courses = repository.findAllActiveCourses();
-    }
-
-    return converter.convertStudentDetails(students, courses);
   }
 
 
@@ -153,41 +110,15 @@ import raisetech.StudentManagement.repository.StudentRepository;
     if (course.getCourseName() == null || course.getCourseName().isBlank()) {
       return;
     }
-    // student_course_id
-    course.setId(UUID.randomUUID().toString());
 
-    // course_id,Student_id
     String fixedCourseId = getCourseIdByName(course.getCourseName());
-    course.setCourseId(fixedCourseId);
+    course.setId(fixedCourseId);
     course.setStudentId(studentDetail.getStudent().getId());
     LocalDate now = LocalDate.now();
     course.setCourseStartAt(now);
     course.setCourseEndAt(now.plusYears(1));
-    course.setCourseStatus("TEMP");
     repository.insertStudentCourses(course);
 
-
-    // course_status
-    StudentCourseStatus status = new StudentCourseStatus();
-    status.setStatusId(UUID.randomUUID().toString());
-    status.setStudentCourseId(course.getId());
-    status.setStatus("TEMP");
-    status.setDeleted(false);
-
-    repository.insertCourseStatus(status);
-
-  }
-
-  /**
-   * 受講コースのstatusが正しい形式か判断します
-   * @param status
-   */
-  private void validateStatus(String status) {
-    switch (status) {
-      case "TEMP", "FORMAL", "TAKING", "DONE" -> {
-      }
-      default -> throw new IllegalArgumentException("ステータスが不正です: " + status);
-    }
   }
 
 
@@ -208,7 +139,6 @@ import raisetech.StudentManagement.repository.StudentRepository;
       for (StudentCourse course : existingCourses) {
         course.setDeleted(true);
         repository.updateStudentCourseDeleted(course);
-        repository.updateCourseStatusDeleted(course.getId());
       }
       return;
     }
@@ -221,7 +151,6 @@ import raisetech.StudentManagement.repository.StudentRepository;
       for (StudentCourse course : existingCourses) {
         course.setDeleted(true);
         repository.updateStudentCourseDeleted(course);
-        repository.updateCourseStatusDeleted(course.getId());
       }
 
       StudentCourse newCourse = studentDetail.getStudentsCourseList().get(0);
@@ -230,36 +159,14 @@ import raisetech.StudentManagement.repository.StudentRepository;
         return;
       }
 
-      String studentCourseId = UUID.randomUUID().toString();
-      newCourse.setId(studentCourseId);
-      newCourse.setCourseId(getCourseIdByName(newCourse.getCourseName()));
+      newCourse.setId(getCourseIdByName(newCourse.getCourseName()));
       newCourse.setStudentId(studentDetail.getStudent().getId());
       newCourse.setCourseStartAt(LocalDate.now());
       newCourse.setCourseEndAt(LocalDate.now().plusYears(1));
       newCourse.setDeleted(false);
 
       repository.insertStudentCourses(newCourse);
-
-    StudentCourseStatus status = new StudentCourseStatus();
-    status.setStatusId(UUID.randomUUID().toString());
-    status.setStudentCourseId(studentCourseId);
-    status.setStatus("TEMP");
-    status.setDeleted(false);
-
-    repository.insertCourseStatus(status);
-
-  }
-
-  @Transactional
-  public void updateCourseStatus(String studentId, String courseId, String status) {
-    validateStatus(status);
-    String studentCourseId = repository.findStudentCourseId(studentId, courseId);
-    if (studentCourseId == null) {
-      throw new StudentNotFoundException("該当コースが存在しません");
     }
-    repository.updateCourseStatus(studentCourseId, status);
-  }
-
 
   public String throwStudentNotFound(String id){
     throw new StudentNotFoundException("受講生IDが無効です。" + id);

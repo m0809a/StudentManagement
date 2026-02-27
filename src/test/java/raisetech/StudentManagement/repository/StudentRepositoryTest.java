@@ -9,8 +9,6 @@ import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
-import raisetech.StudentManagement.domain.StudentCourseInfo;
-import raisetech.StudentManagement.domain.StudentSearchCondition;
 
 @MybatisTest
 class StudentRepositoryTest {
@@ -122,114 +120,21 @@ class StudentRepositoryTest {
     assertThat(actual.getKanaName()).isEqualTo("コウシンテスト");
   }
 
-
   @Test
-  void studentIdとcourseIdからコース情報とステータスが取得できること() {
-    StudentCourseInfo actual = sut.findStudentCourseInfo("S000001", "C000001");
+  void 指定した受講生コース情報をキャンセル出来ること(){
+    StudentCourse course = new StudentCourse();
+    course.setId("C000001");
 
-    assertThat(actual).isNotNull();
-    assertThat(actual.getStudentId()).isEqualTo("S000001");
-    assertThat(actual.getCourseId()).isEqualTo("C000001");
-    assertThat(actual.getStatus()).isEqualTo("TEMP");
+    sut.updateStudentCourseDeleted(course);
+
+    List<StudentCourse> actual = sut.findCoursesByStudentId("S000001");
+    assertThat(actual).anySatisfy(c -> {
+      assertThat(c.getId()).isEqualTo("C000001");
+      assertThat(c.isDeleted()).isTrue();
+    });
+
   }
 
-  @Test
-  void studentIdとcourseIdからstudentCourseIdが取得できること() {
-    String actual = sut.findStudentCourseId("S000001", "C000001");
-    assertThat(actual).isEqualTo("SC000001");
-  }
-
-  @Test
-  void 申込状況が更新できること() {
-    sut.updateCourseStatus("SC000001", "FORMAL");
-
-    StudentCourseInfo actual = sut.findStudentCourseInfo("S000001", "C000001");
-    assertThat(actual.getStatus()).isEqualTo("FORMAL");
-  }
-
-  @Test
-  void 申込状況の論理削除ができてcourseInfoのstatusがnullになること() {
-    sut.updateCourseStatusDeleted("SC000001");
-
-    StudentCourseInfo actual = sut.findStudentCourseInfo("S000001", "C000001");
-    assertThat(actual).isNotNull();
-    assertThat(actual.getStatus()).isNull();
-  }
-
-  @Test
-  void name指定で部分一致する学生が返ること() {
-    StudentSearchCondition cond = new StudentSearchCondition();
-    cond.setName("山田");
-
-    List<Student> actual = sut.searchStudents(cond);
-
-    assertThat(actual).hasSize(1);
-    assertThat(actual.get(0).getName()).contains("山田");
-  }
-
-  @Test
-  void gender指定で該当学生が返ること() {
-    StudentSearchCondition cond = new StudentSearchCondition();
-    cond.setGender("女");
-
-    List<Student> actual = sut.searchStudents(cond);
-
-    assertThat(actual)
-        .allSatisfy(s -> assertThat(s.getGender()).isEqualTo("女"));
-  }
-
-  @Test
-  void ageGroup指定で20代が返ること() {
-    StudentSearchCondition cond = new StudentSearchCondition();
-    cond.setAgeGroup("TWENTIES");
-
-    List<Student> actual = sut.searchStudents(cond);
-
-    assertThat(actual)
-        .allSatisfy(s ->
-            assertThat(s.getAge()).isBetween(20, 29)
-        );
-  }
-
-  @Test
-  void courseId指定で該当学生が返ること() {
-    StudentSearchCondition cond = new StudentSearchCondition();
-    cond.setCourseId("C000001");
-
-    List<Student> actual = sut.searchStudents(cond);
-
-    assertThat(actual).anySatisfy(s -> assertThat(s.getId()).isEqualTo("S000001"));
-  }
-
-  @Test
-  void status指定で該当学生が返ること() {
-    StudentSearchCondition cond = new StudentSearchCondition();
-    cond.setStatus("TEMP");
-
-    List<Student> actual = sut.searchStudents(cond);
-
-    assertThat(actual).hasSize(5);
-  }
-
-  @Test
-  void courseId指定で該当コースが返ること() {
-    StudentSearchCondition cond = new StudentSearchCondition();
-    cond.setCourseId("C000001");
-
-    List<StudentCourse> actual = sut.searchStudentCourses(cond);
-
-    assertThat(actual).anySatisfy(c -> assertThat(c.getCourseId()).isEqualTo("C000001"));
-  }
-
-  @Test
-  void status指定で該当コースが返ること() {
-    StudentSearchCondition cond = new StudentSearchCondition();
-    cond.setStatus("TEMP");
-
-    List<StudentCourse> actual = sut.searchStudentCourses(cond);
-
-    assertThat(actual).hasSize(5);
-  }
 
 
 
